@@ -42,596 +42,624 @@
        </widget>
       </item>
       <item>
-       <widget class="QTabWidget" name="tabWidget">
-        <property name="enabled">
+       <widget class="QSplitter" name="splitter">
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="opaqueResize">
+         <bool>false</bool>
+        </property>
+        <property name="handleWidth">
+         <number>12</number>
+        </property>
+        <property name="childrenCollapsible">
          <bool>true</bool>
         </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>800</width>
-          <height>400</height>
-         </size>
-        </property>
-        <property name="tabPosition">
-         <enum>QTabWidget::South</enum>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="tab">
-         <attribute name="title">
-          <string>对客在途</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_2">
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="columnCount">
-             <number>11</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>交易书编号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>客户名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期货合约</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期权类型</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>手数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售单价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售总价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>系统单号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>主行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权日</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_2">
-         <attribute name="title">
-          <string>对客今开</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_3">
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="columnCount">
-             <number>11</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>交易书编号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>客户名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期货合约</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期权类型</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>手数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售单价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售总价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>系统单号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>主行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权日</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_3">
-         <attribute name="title">
-          <string>对客今止</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_4">
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="columnCount">
-             <number>11</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>交易书编号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>客户名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期货合约</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期权类型</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>手数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售单价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售总价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>系统单号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>主行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权日</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_4">
-         <attribute name="title">
-          <string>对公在途</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_5">
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="columnCount">
-             <number>11</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>交易书编号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>客户名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期货合约</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期权类型</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>手数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售单价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售总价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>系统单号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>主行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权日</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_5">
-         <attribute name="title">
-          <string>对公今开</string>
-         </attribute>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_6">
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="columnCount">
-             <number>11</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>交易书编号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>客户名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期货合约</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期权类型</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>手数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售单价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售总价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>系统单号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>主行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权日</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="tab_6">
-         <attribute name="title">
-          <string>对公今止</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QTableWidget" name="tableWidget_7">
-            <property name="sortingEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="columnCount">
-             <number>11</number>
-            </property>
-            <column>
-             <property name="text">
-              <string>交易书编号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>客户名称</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期货合约</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>期权类型</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>手数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售单价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>销售总价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>系统单号</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>主行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权价</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>辅行权日</string>
-             </property>
-            </column>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_6">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_19">
-        <item>
-         <spacer name="verticalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_162">
-          <property name="text">
-           <string>过滤显示</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
+        <widget class="QTabWidget" name="tabWidget_3">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>1000</width>
+           <height>400</height>
+          </size>
+         </property>
+         <property name="tabPosition">
+          <enum>QTabWidget::South</enum>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab_13">
+          <attribute name="title">
+           <string>对客在途</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_28">
+           <item>
+            <widget class="QTableWidget" name="tableWidget_14">
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>11</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>交易书编号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期货合约</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>手数</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售单价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售总价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>系统单号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>主行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权日</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item>
-         <layout class="QFormLayout" name="formLayout_7">
+         <widget class="QWidget" name="tab_14">
+          <attribute name="title">
+           <string>对客今开</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_29">
+           <item>
+            <widget class="QTableWidget" name="tableWidget_15">
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>11</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>交易书编号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期货合约</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>手数</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售单价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售总价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>系统单号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>主行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权日</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_15">
+          <attribute name="title">
+           <string>对客今止</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_30">
+           <item>
+            <widget class="QTableWidget" name="tableWidget_16">
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>11</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>交易书编号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期货合约</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>手数</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售单价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售总价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>系统单号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>主行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权日</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_16">
+          <attribute name="title">
+           <string>对公在途</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_31">
+           <item>
+            <widget class="QTableWidget" name="tableWidget_17">
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>11</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>交易书编号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期货合约</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>手数</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售单价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售总价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>系统单号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>主行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权日</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_17">
+          <attribute name="title">
+           <string>对公今开</string>
+          </attribute>
+          <layout class="QHBoxLayout" name="horizontalLayout_32">
+           <item>
+            <widget class="QTableWidget" name="tableWidget_18">
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>11</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>交易书编号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期货合约</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>手数</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售单价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售总价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>系统单号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>主行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权日</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tab_18">
+          <attribute name="title">
+           <string>对公今止</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_64">
+           <item>
+            <widget class="QTableWidget" name="tableWidget_19">
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="columnCount">
+              <number>11</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>交易书编号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期货合约</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>手数</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售单价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>销售总价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>系统单号</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>主行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权价</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>辅行权日</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="layoutWidget_2">
+         <layout class="QVBoxLayout" name="verticalLayout_65">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
-          <property name="horizontalSpacing">
-           <number>50</number>
-          </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="Label">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>期权类型</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="LineEdit">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="Label_2">
-            <property name="text">
-             <string>客户名称</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="LineEdit_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="Label_3">
-            <property name="text">
-             <string>合约代码</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="LineEdit_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_18">
           <item>
-           <widget class="QPushButton" name="pushButton_18">
-            <property name="text">
-             <string>导出数据</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
+           <spacer name="verticalSpacer_8">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
+             <enum>Qt::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>20</width>
+              <height>40</height>
              </size>
             </property>
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_19">
+           <widget class="QLabel" name="label_165">
             <property name="text">
-             <string>整理/恢复</string>
+             <string>过滤显示</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
+          <item>
+           <layout class="QFormLayout" name="formLayout_10">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <property name="horizontalSpacing">
+             <number>50</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="Label_10">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>期权类型</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="LineEdit_10">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="Label_11">
+              <property name="text">
+               <string>客户名称</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="LineEdit_11">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="Label_12">
+              <property name="text">
+               <string>合约代码</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="LineEdit_12">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_33">
+            <item>
+             <widget class="QPushButton" name="pushButton_26">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>导出数据</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_27">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>整理/恢复</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
-        </item>
-       </layout>
+        </widget>
+       </widget>
       </item>
       <item>
        <widget class="Line" name="line_7">
@@ -669,7 +697,7 @@
 }</string>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="page_3">
          <property name="styleSheet">
@@ -3652,6 +3680,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_21">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>查看全部</string>
               </property>
@@ -3672,7 +3706,7 @@
           <item row="0" column="0">
            <widget class="QTextBrowser" name="textBrowser">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>

@@ -7,10 +7,10 @@
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QApplication
 
-from UIpy.loginDialog import Ui_dialog
+from UIpy.loginDialog import Ui_LoginDialog
 
 
-class LoginDialogControl(QDialog, Ui_dialog):
+class LoginDialogControl(QDialog, Ui_LoginDialog):
     def __init__(self):
         super(LoginDialogControl, self).__init__()
         self.setupUi(self)
@@ -48,7 +48,7 @@ class LoginDialogProperty:
         self.local_proxy_server_port = local_proxy_server_port
 
     def check(self, dialog: LoginDialogControl):
-        '''检查输入是否符合要求（是否为空）,如果为空，返回该属性的值和属性名'''
+        '''检查输入是否符合要求（是否为空）,如果不符合，返回1，否则返回0'''
         # print(self.__dict__)
         count = 0
         for property_name, property_value in self.__dict__.items():
