@@ -114,7 +114,7 @@ class ColorManage:
         for color_setting in self.color_setting_list:
             print(color_setting.color)
 
-    def check_color(self, ):
+    def check_color(self):
         '''检查颜色是否重复'''
         for i in range(len(self.color_setting_list)):
             for j in range(i + 1, len(self.color_setting_list)):

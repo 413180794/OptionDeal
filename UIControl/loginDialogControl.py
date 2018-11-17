@@ -4,6 +4,9 @@
 # @Site    : 
 # @File    : loginDialogControl.py
 # @Software: PyCharm
+import asyncio
+import hashlib
+
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QApplication
 
@@ -25,23 +28,41 @@ class LoginDialogControl(QDialog, Ui_LoginDialog):
         '''
 
          # 如果初始化时候没有建立连接，那么点击登录键的时候再次建立一次
-        self.mainFormControl.connect_to_signing_server()
+        # self.mainFormControl.connect_to_signing_server() 登录应该由loginDialogPropertyModel做出
         self.lineedit_empty_Label.setText("")
-        loginDialogPropertyModel = LoginDialogPropertyModel(user_name=self.user_name_LineEdit.text(),
-                                                       password=self.password_LineEdit.text(),
-                                                       intranet_server_ip=self.intranet_server_ip_LineEdit.text(),
-                                                       intranet_server_port=self.intranet_server_port_LineEdit.text(),
-                                                       local_proxy_server_port=self.local_proxy_server_port_LineEdit.text(),
-                                                       mainFormControl=self.mainFormControl
-                                                       )
+        loginDialogPropertyModel = LoginDialogPropertyModel(self)
         state = loginDialogPropertyModel.check()
         if state == 1:
             return
         else:
             # 如果所有的空都有，那么把登录请求发送出去
+            # loginDialogPropertyModel.connect_to_server()
             loginDialogPropertyModel.login()
-            self.mainFormControl.change_loginDialog_lineedit_empty_label_text("登录中......")
+
+            self.change_loginDialog_lineedit_empty_label_text("登录中......")
             print("继续")
+
+    def get_user_name(self):
+        '''获得登录界面用户名'''
+        return self.user_name_LineEdit.text()
+
+    def get_password(self):
+        '''获得登录界面密码的md5加密'''
+        return hashlib.md5(self.password_LineEdit.text().encode('utf-8')).hexdigest()
+
+    def get_intranet_server_ip(self):
+        return self.intranet_server_ip_LineEdit.text()
+
+    def get_intranet_server_port(self):
+        return self.intranet_server_port_LineEdit.text()
+
+    def get_local_proxy_server_port(self):
+        return self.local_proxy_server_port_LineEdit.text()
+
+    def change_loginDialog_lineedit_empty_label_text(self, text):
+        # 改变登录框中红色标签的内容
+        self.lineedit_empty_Label.setText(text)
+
 
 
 if __name__ == '__main__':

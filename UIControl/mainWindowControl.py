@@ -5,13 +5,18 @@ import sys
 import logging
 
 import websockets
+from PyQt5 import QtGui, QtCore, QtWidgets
 from quamash import QEventLoop
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel
 
 from UIControl.dataInteraction import DataInteraction
 from UIControl.loginDialogControl import LoginDialogControl
+from UIModel.loginFailedModel import LoginFailedModel
+from UIModel.loginSuccessModel import LoginSuccessModel
+from UIModel.optionEssentialInfoModel import OptionEssentialInfoModel
 from UIModel.optionInformationModel import OptionInformationModel
+from UIModel.requestEssentialInfoModel import RequestEssentialInfoModel
 from UIView.mainWindow import Ui_MainWindow
 import asyncio
 import uvloop
@@ -19,7 +24,7 @@ import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
-handler = logging.FileHandler("log.txt")
+handler = logging.FileHandler("main_log.txt")
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
@@ -35,26 +40,30 @@ ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 ssl_context.load_verify_locations(
     pathlib.Path(__file__).with_name('localhost.pem'))
 
+widget_name_lineEdit = {"行权价": "strike_price_lineEdit", "向下止盈": "target_profit_lineEdit"}
+time_widget_name = {"最近到期日": "date_due"}
+
 
 class MainFormControl(QMainWindow, Ui_MainWindow):
     '''在设计上，我们认为MainFormControl是一个上帝角色，它不仅显示了自己，还可以控制所有的子窗口，我们
     要在这个类中写出控制其他子窗口的函数，以此来达到“最小知识原则” '''
     testSigal = pyqtSignal()
-    login_success_signal = pyqtSignal()  # 登录成功信号
-    login_failed_signal = pyqtSignal()  # 登录失败信号
-
+    login_success_signal = pyqtSignal(dict)  # 登录成功信号
+    login_failed_signal = pyqtSignal(dict)  # 登录失败信号
+    opt_ess_info_signal = pyqtSignal(dict) # 收到期权基本信息数据包 的信号
     def __init__(self, loop):
         super(MainFormControl, self).__init__()
         self.setupUi(self)
         self.loop = loop
         self.loginDialog = LoginDialogControl(self)
-        self.data_interaction_signing_server = DataInteraction(self.loop, self, "wss://localhost:8765")
+        self.data_interaction_signing_server = DataInteraction(self.loop, self)
         self.loginDialog.show()
 
         # signal
         self.testSigal.connect(self.on_test_signal)
         self.login_success_signal.connect(self.on_login_success_signal)
         self.login_failed_signal.connect(self.on_login_failed_signal)
+        self.opt_ess_info_signal.connect(self.on_opt_ess_info_signal)
         #
 
         # 注意这个六个赋值，原来QTableWidget是没有option_info_obj_list的，这是我强行添加的属性，用于保存每一条信息对象
@@ -71,6 +80,19 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
                               "对公今止": "today_close_for_company_tableWidget"}
 
         self.old_option_info_obj = None  # 防止一直在点击同一行，一直在触发函数
+        self.second_contract_widget = [
+            self.second_contract_code_name_label,
+            self.second_contract_code_label,
+            self.second_futures_price_name_label,
+            self.second_unit_price_name_label,
+            self.second_total_price_name_label,
+            self.second_option_price_label,
+            self.second_unit_price_label,
+            self.second_total_price_label,
+            self.second_max_lots_name_label,
+            self.second_max_lots_label,
+        ] # 次主力合约的所有控件
+        #
 
         self.test()
 
@@ -80,92 +102,118 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
     # async def connect_test(self):
     #     self.websocket = await websockets.connect("wss://192.168.0.112:8888/traecho")
-    def on_login_failed_signal(self):
-        '''触发登录失败'''
+    @pyqtSlot()
+    def on_cancel_pushButton_in_open_check_feasibility_page_clicked(self):
+        '''点击取消 回到控制页面'''
+        self.stackedWidget.setCurrentWidget(self.control_module_page)
 
-    def on_login_success_signal(self):
-        '''触发登录成功'''
-        print("登录成功")
-        self.loginDialog.setVisible(False)  # 隐藏登录界面
+    @pyqtSlot()
+    def on_sell_new_option_action_triggered(self):
+        '''点击销售新期权,页面跳转'''
+        self.stackedWidget.setCurrentWidget(self.open_check_feasibility_page)
+
+    @pyqtSlot()
+    def on_next_pushButton_in_open_check_feasibility_page_clicked(self):
+        '''点击期权开仓--检查开仓页面中的下一步按钮
+            1.交易端构建请求期权信息数据包,将此数据包发送给签约服务器
+            2.等待接收 期权基本信息数据包 等待接收数据不在这里,收到期权基本信息数据包,将会调用 on_opt_ess_info_signal函数
+        '''
+        requestEssentialInfoModel = RequestEssentialInfoModel(self)
+        requestEssentialInfoModel.send_json_to_signing_server() # 发送给签约服务器
+
+    def on_opt_ess_info_signal(self,json):
+        '''
+        如果收到了 期权基本信息数据包,将会调用此函数,执行以下步骤
+            1.由收到的json构建期权基本信息数据包
+            2.进入信息补全页面,并且利用基本信息数据包填写信息补全页面的一部分的信息
+        '''
+        option_essential_info_model = OptionEssentialInfoModel.from_json(self,json)
+        self.stackedWidget.setCurrentWidget(self.complement_infomation_page)
+        option_essential_info_model.set_show_fvcode_label_text()
+        option_essential_info_model.set_main_max_lots_label_text()
+        option_essential_info_model.set_secode_max_lots_label_text()
+
+
+
+
+
+    def on_login_failed_signal(self,json):
+        '''触发登录失败'''
+        login_failed_model = LoginFailedModel.from_json(self,json)
+        # 在登录界面中显示失败的原因
+        self.loginDialog.change_loginDialog_lineedit_empty_label_text(login_failed_model.failure_reason)
+        self.data_interaction_signing_server.disconnect_to_server()
+
+    def on_login_success_signal(self, json):
+        '''
+        触发登录成功,登录成功后,需要做出以下步骤:
+            1.关闭登录界面
+            2.由发送而来的json数据,构建登录成功模型
+                1.该模型对象自动完成动态构建控件
+                2.该模型对象自动将userid,lineEdit_dict,dateEdit_dict分配给主控制对象
+                    以下四条数据是成功登录以后签约服务器发送而来的, 代表的意思分别是:
+                    1.用户id,唯一标识
+                    2.主力合约中需要填写的价格,键为该价格中文含义,值为该价格输入框的变量名
+                    3.次主力合约中需要填写的价格,键为该价格中文含义,值为该价格输入框的变量名
+                    4.需要填写的日期,键为该日期的中文含义,值为该日期输入框的变量名
+                    self.userid = None
+                    self.main_lineEdit_dict = None
+                    self.second_lineEdit_dict = None
+                    self.dateEdit_dict = None
+        '''
+        logger.info("登录成功")
+        # self.loginDialog.setVisible(False)  # 隐藏登录界面
+        self.loginDialog.close()
+        LoginSuccessModel.from_json(self, json)  #
+        # print(self.userid)
+        # print(self.main_lineEdit_dict)
+        # print(self.second_lineEdit_dict)
+        # print(self.dateEdit_dict)
         self.show()  # 打开主界面
 
     def send_to_signing_server(self, json):
         '''向签约服务器发送数据'''
         self.data_interaction_signing_server.send_data(json)
 
-    def change_loginDialog_lineedit_empty_label_text(self, text):
-        # 改变登录框中红色标签的内容
-        self.loginDialog.lineedit_empty_Label.setText(text)
-
     def if_connect_to_signing_server(self):
         '''判断是否连接到签约服务器'''
         return False if self.data_interaction_signing_server.web_socket is None else True
 
-    def connect_to_signing_server(self):
-        '''连接到签约服务器'''
-        if self.if_connect_to_signing_server():  # 如果没有连接到签约服务器
-            self.data_interaction_signing_server.connect_to_server()
+    def login_to_signing_server(self, url, port, login_request_json):
+        '''登录到到签约服务器'''
+        logger.info("登录到签约服务器-->" + str(self.if_connect_to_signing_server()))
+        # print(self.if_connect_to_signing_server())
+        self.data_interaction_signing_server.connect_to_sever(url + ":" + port, login_request_json)
 
     def test(self):
-        tes = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 10, 46.4, 4640000, "1809045", 650, 1539273600.0,
+        tes = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 10, 46.4, 4640000, "1809045", 650,
+                                     1539273600.0,
                                      730, 1539273600.0, "对客在途", 1000)
-        tes.insert_to_table(getattr(self, self.tab_name_dict.get(tes.state)))
-        tes1 = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
+        # tes.insert_to_table(getattr(self, self.tab_name_dict.get(tes.state)))
+        tes1 = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
                                       1539273600.0,
                                       7320, 1539273600.0, "对公在途", 1000)
-        tes1.insert_to_table(getattr(self, self.tab_name_dict.get(tes1.state)))
-        tes2 = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
+        # tes1.insert_to_table(getattr(self, self.tab_name_dict.get(tes1.state)))
+        tes2 = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
                                       1539273600.0,
                                       7320, 1539273600.0, "对公今开", 1000)
-        tes2.insert_to_table(getattr(self, self.tab_name_dict.get(tes2.state)))
-        tes3 = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
+        # tes2.insert_to_table(getattr(self, self.tab_name_dict.get(tes2.state)))
+        tes3 = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
                                       1539273600.0,
                                       7320, 1539273600.0, "对客今开", 1000)
-        tes3.insert_to_table(getattr(self, self.tab_name_dict.get(tes3.state)))
-        tes4 = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
+        # tes3.insert_to_table(getattr(self, self.tab_name_dict.get(tes3.state)))
+        tes4 = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
                                       1539273600.0,
                                       7320, 1539273600.0, "对公今止", 1000)
-        tes4.insert_to_table(getattr(self, self.tab_name_dict.get(tes4.state)))
-        tes5 = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
+        # tes4.insert_to_table(getattr(self, self.tab_name_dict.get(tes4.state)))
+        tes5 = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
                                       1539273600.0,
                                       7320, 1539273600.0, "对客今止", 1000)
-        tes5.insert_to_table(getattr(self, self.tab_name_dict.get(tes5.state)))
-        tes6 = OptionInformationModel("S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
+        # tes5.insert_to_table(getattr(self, self.tab_name_dict.get(tes5.state)))
+        tes6 = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 130, 46.4, 4640000, "1809045", 650,
                                       1539273600.0,
                                       7320, 1539273600.0, "对客今止", 1000)
-        tes6.insert_to_table(getattr(self, self.tab_name_dict.get(tes6.state)))
-
-    async def hello2(self):
-        async with websockets.connect("wss://localhost:8765", ssl=ssl_context) as websocket:
-            await websocket.send("name")
-            greeting = await websocket.recv()
-
-    # async def hello(self):
-    #
-    # reply = QMessageBox.question(self, 'Message', "Are you sure to quit?", QMessageBox.Yes, QMessageBox.No)
-    # if reply == QMessageBox.Yes:
-    #     name = "yes"
-    # else:
-    #     name = "No"
-    # print(name)
-
-    # async with websockets.connect("ws://192.168.0.112:8888/traecho") as websocket:
-    # async with websockets.connect("wss://localhost:8765",ssl=ssl_context) as websocket:
-    # websocket  = await  websockets.connect("wss://localhost:8765", ssl=ssl_context)
-    # await self.websocket.send(json.dumps({"dictate": "询价", "contractCode": "1111"}))
-    #
-    # # await self.websocket.send(name)
-    # # while True:
-    # # print(type(json.dumps({"dictate": "询价", "contractCode": "1111"})))
-    # # n = 0
-    #
-    # greeting = await self.websocket.recv()
-    #
-    # print(f"<{greeting}")
-    # # websocket.close()
-    # print(type(greeting))
-
-    # await x.close()
+        # tes6.insert_to_table(getattr(self, self.tab_name_dict.get(tes6.state)))
 
     @pyqtSlot()
     def on_evening_up_enquiry_pushButton_clicked(self):
@@ -185,15 +233,9 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             其中a,b,c,d,e,f为控制界面已经存在的数据。
             g,h,i为向签约服务器询价结果
         '''
-        if not self.contract_code_label.text():
-            loginDialog = LoginDialogControl()
-            loginDialog.show()
-            loginDialog.raise_()
-            # loginDialog.activateWindow()
-            return
         # 构造一个包,向签约服务器询价,签约服务判断是否可以询价,如果不可以提示拒绝询价,否则,将询价结果显示在界面中
         # asyncio.run_coroutine_threadsafe(self.enquiry_price_one(),self.loop)
-        self.data_interaction.send_data(json.dumps({"purpose": "询价", "contractCode": "1111"}))
+        # self.data_interaction_signing_server.send_data(json.dumps({"purpose": "询价", "contractCode": "1111"}))
 
     async def enquiry_price_one(self):
         '''询价一次'''
@@ -213,6 +255,11 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
                 self.number_per_hand_label_in_enquiry_page.setText(self.number_per_hand_label.text())
             else:
                 self.testSigal.emit()
+
+    @pyqtSlot()
+    def on_test_pushButton_clicked(self):
+
+        self.main_strike_price_lineEdit.hide()
 
     def on_test_signal(self):
 
@@ -251,7 +298,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         else:
             self._change_control_module_page(option_info_obj)
             self.old_option_info_obj = option_info_obj
-            logger.info(option_info_obj)
+            # logger.info(option_info_obj)
 
     @pyqtSlot(int, int)
     def on_on_way_for_company_tableWidget_cellClicked(self, row, column):
@@ -261,7 +308,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         else:
             self._change_control_module_page(option_info_obj)
             self.old_option_info_obj = option_info_obj
-            logger.info(option_info_obj)
+            # logger.info(option_info_obj)
 
     @pyqtSlot(int, int)
     def on_today_close_for_guest_tableWidget_cellClicked(self, row, column):
@@ -271,7 +318,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         else:
             self._change_control_module_page(option_info_obj)
             self.old_option_info_obj = option_info_obj
-            logger.info(option_info_obj)
+            # logger.info(option_info_obj)
 
     @pyqtSlot(int, int)
     def on_today_close_for_company_tableWidget_cellClicked(self, row, column):
@@ -281,7 +328,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         else:
             self._change_control_module_page(option_info_obj)
             self.old_option_info_obj = option_info_obj
-            logger.info(option_info_obj)
+            # logger.info(option_info_obj)
 
     @pyqtSlot(int, int)
     def on_today_open_for_guest_tableWidget_cellClicked(self, row, column):
@@ -291,7 +338,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         else:
             self._change_control_module_page(option_info_obj)
             self.old_option_info_obj = option_info_obj
-            logger.info(option_info_obj)
+            # logger.info(option_info_obj)
 
     @pyqtSlot(int, int)
     def on_today_open_for_company_tableWidget_cellClicked(self, row, column):
@@ -301,7 +348,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         else:
             self._change_control_module_page(option_info_obj)
             self.old_option_info_obj = option_info_obj
-            logger.info(option_info_obj)
+            # logger.info(option_info_obj)
 
 
 class App(QApplication):

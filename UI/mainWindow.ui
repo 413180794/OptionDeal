@@ -778,7 +778,7 @@
 }</string>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="control_module_page">
          <property name="styleSheet">
@@ -1708,7 +1708,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="page_2">
+        <widget class="QWidget" name="open_check_feasibility_page">
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
            <widget class="QLabel" name="label">
@@ -1756,7 +1756,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit">
+             <widget class="QLineEdit" name="fvcode_lineEdit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1766,7 +1766,7 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QDateEdit" name="dateEdit"/>
+             <widget class="QDateEdit" name="furthest_date_due_dateEdit"/>
             </item>
            </layout>
           </item>
@@ -1786,7 +1786,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
-             <widget class="QPushButton" name="pushButton_9">
+             <widget class="QPushButton" name="cancel_pushButton_in_open_check_feasibility_page">
               <property name="text">
                <string>取消</string>
               </property>
@@ -1806,7 +1806,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_4">
+             <widget class="QPushButton" name="next_pushButton_in_open_check_feasibility_page">
               <property name="text">
                <string>下一步</string>
               </property>
@@ -1816,7 +1816,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="page_5">
+        <widget class="QWidget" name="complement_infomation_page">
          <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
            <widget class="QLabel" name="label_9">
@@ -1842,20 +1842,135 @@
             <property name="verticalSpacing">
              <number>5</number>
             </property>
-            <item row="1" column="0" colspan="8">
-             <widget class="Line" name="line">
+            <item row="3" column="0" colspan="6">
+             <widget class="Line" name="line_3">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
-            <item row="8" column="3" colspan="3">
-             <widget class="QLabel" name="label_106">
-              <property name="text">
-               <string>主力//次主力</string>
+            <item row="2" column="3" colspan="4">
+             <layout class="QVBoxLayout" name="verticalLayout_49">
+              <property name="spacing">
+               <number>0</number>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+              <item>
+               <layout class="QFormLayout" name="second_contract_formLayout">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="second_contract_code_name_label">
+                  <property name="text">
+                   <string>次主力合约：</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLabel" name="second_contract_code_label">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QGridLayout" name="gridLayout_11">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="second_futures_price_name_label">
+                  <property name="text">
+                   <string>期货价</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="2">
+                 <widget class="QLabel" name="second_total_price_label">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2">
+                 <widget class="QLabel" name="second_total_price_name_label">
+                  <property name="text">
+                   <string>总价</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLabel" name="second_unit_price_name_label">
+                  <property name="text">
+                   <string>单价</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="second_option_price_label">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLabel" name="second_unit_price_label">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="second_max_lots_name_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>手数</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1" colspan="2">
+                 <widget class="QLabel" name="second_max_lots_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0" colspan="8">
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -1867,16 +1982,9 @@
              </widget>
             </item>
             <item row="8" column="0">
-             <widget class="QPushButton" name="pushButton_10">
+             <widget class="QPushButton" name="cancel_pushButton_in_complement_infomation_page">
               <property name="text">
                <string>取消</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" colspan="6">
-             <widget class="Line" name="line_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -1920,6 +2028,13 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>期货合约代码</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item row="0" column="1">
@@ -1930,10 +2045,10 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_6">
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_2"/>
+                 <widget class="QLineEdit" name="lots_lineEdit_in_complement_infomation_page"/>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_10">
+                 <widget class="QLabel" name="show_lots_lineEdit_label">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                     <horstretch>0</horstretch>
@@ -1960,7 +2075,7 @@
                </layout>
               </item>
               <item>
-               <widget class="QLabel" name="label_91">
+               <widget class="QLabel" name="furthest_date_due_label">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1968,10 +2083,17 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>2018/10/31</string>
+                 <string/>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="show_fvcode_label">
+                <property name="text">
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -1987,9 +2109,9 @@
             <item row="8" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
-               <widget class="QLabel" name="label_101">
+               <widget class="QLabel" name="customer_name_name_label">
                 <property name="text">
-                 <string>客户名称</string>
+                 <string>客户名称 :</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -1997,7 +2119,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_96">
+               <widget class="QLabel" name="custemer_name_label">
                 <property name="text">
                  <string>太原钢铁</string>
                 </property>
@@ -2009,7 +2131,7 @@
              </layout>
             </item>
             <item row="0" column="3">
-             <layout class="QVBoxLayout" name="verticalLayout_41">
+             <layout class="QVBoxLayout" name="label_name_widget_verticalLayout">
               <property name="spacing">
                <number>0</number>
               </property>
@@ -2029,40 +2151,15 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QLabel" name="label_89">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>可行权前一日</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
             <item row="0" column="4" colspan="4">
-             <layout class="QVBoxLayout" name="verticalLayout_43">
+             <layout class="QVBoxLayout" name="dateEdit_widget_verticalLayout">
               <property name="spacing">
                <number>0</number>
               </property>
               <item>
-               <widget class="QComboBox" name="comboBox">
-                <item>
-                 <property name="text">
-                  <string>认抛止盈</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QDateEdit" name="dateEdit_2"/>
+               <widget class="QComboBox" name="option_type_comboBox"/>
               </item>
              </layout>
             </item>
@@ -2072,16 +2169,16 @@
                <number>0</number>
               </property>
               <item>
-               <layout class="QFormLayout" name="formLayout">
+               <layout class="QFormLayout" name="main_contract_formLayout">
                 <item row="0" column="0">
-                 <widget class="QLabel" name="label_11">
+                 <widget class="QLabel" name="main_contract_code_name_label">
                   <property name="text">
                    <string>主力合约：</string>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLabel" name="label_12">
+                 <widget class="QLabel" name="main_contract_code_label">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                     <horstretch>0</horstretch>
@@ -2089,44 +2186,10 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>J1905</string>
+                   <string/>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_13">
-                  <property name="text">
-                   <string>行权价</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_14">
-                  <property name="text">
-                   <string>向下止盈</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="lineEdit_3">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QLineEdit" name="lineEdit_4">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
                   </property>
                  </widget>
                 </item>
@@ -2135,7 +2198,7 @@
               <item>
                <layout class="QGridLayout" name="gridLayout_5">
                 <item row="0" column="2">
-                 <widget class="QLabel" name="label_24">
+                 <widget class="QLabel" name="main_total_price_name_label">
                   <property name="text">
                    <string>总价</string>
                   </property>
@@ -2145,7 +2208,7 @@
                  </widget>
                 </item>
                 <item row="2" column="1" colspan="2">
-                 <widget class="QLabel" name="label_98">
+                 <widget class="QLabel" name="main_max_lots_label">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -2153,12 +2216,12 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>800</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLabel" name="label_23">
+                 <widget class="QLabel" name="main_unit_price_name_label">
                   <property name="text">
                    <string>单价</string>
                   </property>
@@ -2168,7 +2231,7 @@
                  </widget>
                 </item>
                 <item row="0" column="0">
-                 <widget class="QLabel" name="label_18">
+                 <widget class="QLabel" name="main_futures_price_name_label">
                   <property name="text">
                    <string>期货价</string>
                   </property>
@@ -2178,9 +2241,9 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QLabel" name="label_25">
+                 <widget class="QLabel" name="main_unit_price_label">
                   <property name="text">
-                   <string>36.1</string>
+                   <string/>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2188,7 +2251,7 @@
                  </widget>
                 </item>
                 <item row="2" column="0">
-                 <widget class="QLabel" name="label_100">
+                 <widget class="QLabel" name="main_max_lots_name_label">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -2201,9 +2264,9 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QLabel" name="label_17">
+                 <widget class="QLabel" name="main_option_price_label">
                   <property name="text">
-                   <string>1383</string>
+                   <string/>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2211,9 +2274,9 @@
                  </widget>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QLabel" name="label_41">
+                 <widget class="QLabel" name="main_total_price_label">
                   <property name="text">
-                   <string>28800</string>
+                   <string/>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2240,7 +2303,7 @@
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_16">
+               <widget class="QPushButton" name="test_pushButton">
                 <property name="text">
                  <string>询价</string>
                 </property>
@@ -2248,141 +2311,21 @@
               </item>
              </layout>
             </item>
-            <item row="2" column="3" colspan="4">
-             <layout class="QVBoxLayout" name="verticalLayout_49">
-              <property name="spacing">
-               <number>0</number>
-              </property>
+            <item row="8" column="3" colspan="4">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <layout class="QFormLayout" name="formLayout_3">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_42">
-                  <property name="text">
-                   <string>次主力合约：</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLabel" name="label_90">
-                  <property name="text">
-                   <string>J1905</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_92">
-                  <property name="text">
-                   <string>行权价</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="lineEdit_5"/>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_93">
-                  <property name="text">
-                   <string>向下止盈</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1">
-                 <widget class="QLineEdit" name="lineEdit_6"/>
-                </item>
-               </layout>
+               <widget class="QRadioButton" name="radioButton_2">
+                <property name="text">
+                 <string>主力</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <layout class="QGridLayout" name="gridLayout_11">
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_95">
-                  <property name="text">
-                   <string>期货价</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="2">
-                 <widget class="QLabel" name="label_105">
-                  <property name="text">
-                   <string>28800</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="2">
-                 <widget class="QLabel" name="label_103">
-                  <property name="text">
-                   <string>总价</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLabel" name="label_94">
-                  <property name="text">
-                   <string>单价</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="label_102">
-                  <property name="text">
-                   <string>1383</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLabel" name="label_104">
-                  <property name="text">
-                   <string>36.1</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QLabel" name="label_99">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>手数</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="1" colspan="2">
-                 <widget class="QLabel" name="label_97">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>800</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QRadioButton" name="radioButton">
+                <property name="text">
+                 <string>次主力</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -3875,7 +3818,7 @@
     </property>
     <addaction name="action"/>
     <addaction name="action_2"/>
-    <addaction name="action_3"/>
+    <addaction name="sell_new_option_action"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -3901,7 +3844,7 @@
     <string>查看可交易期货</string>
    </property>
   </action>
-  <action name="action_3">
+  <action name="sell_new_option_action">
    <property name="text">
     <string>销售新期权</string>
    </property>

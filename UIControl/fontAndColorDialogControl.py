@@ -41,6 +41,8 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
         self.color_manage.init_color_setting(
             [QColor(0, 0, 0), QColor(0, 255, 0), QColor(255, 0, 0), QColor(0, 0, 255), QColor(255, 7, 0)])
         self.state = 0 # 如果state状态为0，表明当前的颜色不重复，允许点击确认修改，否则不允许点击确认修改
+
+
     @pyqtSlot()
     def on_font_toolButton_clicked(self):
         '''点击字体设置键，触发设置字体功能'''
