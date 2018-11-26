@@ -10,12 +10,12 @@ from quamash import QEventLoop
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp
 
-
 from UIModel.enquiryFeasibilityRequestModel import EnquiryFeasibilityRequestModel
 
 from UIModel.optionEssentialInfoModel import OptionEssentialInfoModel
 from UIModel.optionInformationModel import OptionInformationModel
 from UIModel.requestEssentialInfoModel import RequestEssentialInfoModel
+from UIModel.updateUsersInfoModel import UpdateUsersInfoModel
 from UIView.mainWindow import Ui_MainWindow
 import asyncio
 import uvloop
@@ -43,12 +43,11 @@ widget_name_lineEdit = {"行权价": "strike_price_lineEdit", "向下止盈": "t
 time_widget_name = {"最近到期日": "date_due"}
 
 
-
 class MainFormControl(QMainWindow, Ui_MainWindow):
-
     testSigal = pyqtSignal()
+    users_info_update_signal = pyqtSignal(dict)
+    opt_ess_info_signal = pyqtSignal(dict)  # 收到期权基本信息数据包 的信号
 
-    opt_ess_info_signal = pyqtSignal(dict) # 收到期权基本信息数据包 的信号
     def __init__(self, loop):
         super(MainFormControl, self).__init__()
         self.setupUi(self)
@@ -59,7 +58,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         # signal
         self.testSigal.connect(self.on_test_signal)
-
+        self.users_info_update_signal.connect(self.on_users_info_update_signal)
         self.opt_ess_info_signal.connect(self.on_opt_ess_info_signal)
         #
         # self.lots_lineEdit_in_complement_infomation_page.textChange(self.on_lots_lineEdit_in_complement_infomation_page_textChange)
@@ -88,9 +87,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             self.second_total_price_label,
             self.second_max_lots_name_label,
             self.second_max_lots_label,
-        ] # 次主力合约的所有控件
+        ]  # 次主力合约的所有控件
         #
-
 
         self.test()
 
@@ -116,7 +114,6 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     def on_action_triggered(self):
         qApp.exit(888)
 
-
     @pyqtSlot()
     def on_next_pushButton_in_open_check_feasibility_page_clicked(self):
         '''点击期权开仓--检查开仓页面中的下一步按钮
@@ -124,9 +121,9 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             2.等待接收 期权基本信息数据包 等待接收数据不在这里,收到期权基本信息数据包,将会调用 on_opt_ess_info_signal函数
         '''
         requestEssentialInfoModel = RequestEssentialInfoModel(self)
-        requestEssentialInfoModel.send_json_to_signing_server() # 发送给签约服务器
+        requestEssentialInfoModel.send_json_to_signing_server()  # 发送给签约服务器
 
-    def on_opt_ess_info_signal(self,json):
+    def on_opt_ess_info_signal(self, json):
         '''
         如果收到了 期权基本信息数据包,将会调用此函数,执行以下步骤
             0.删除期货品种代码中的内容
@@ -140,18 +137,19 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
                 5.次主力合约代码（如果有）
         '''
         self.fvcode_lineEdit.clear()  # 删除期货品种代码中的内容
-        option_essential_info_model = OptionEssentialInfoModel.from_json(self,json)
+        option_essential_info_model = OptionEssentialInfoModel.from_json(self, json)
         self.stackedWidget.setCurrentWidget(self.complement_infomation_page)
         option_essential_info_model.set_show_fvcode_label_text()
         option_essential_info_model.set_furthest_date_due_label_text()
         option_essential_info_model.set_main_max_lots_label_text()
         option_essential_info_model.set_secode_max_lots_label_text()
 
-
-
-
-
-
+    def on_users_info_update_signal(self, json):
+        '''收到了用户信息,构建updateUsersInfoModel,删除两个列表中除了第一行所有用户名,根据用户名列表更新该列'''
+        print(json)
+        update_users_info_model = UpdateUsersInfoModel.from_json(self, json)
+        update_users_info_model.remove_all_item()
+        update_users_info_model.add_new_item()
 
     def send_to_signing_server(self, json):
         '''向签约服务器发送数据'''
@@ -161,12 +159,10 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         '''判断是否连接到签约服务器'''
         return False if self.data_interaction_signing_server.web_socket is None else True
 
-
     @pyqtSlot(str)
-    def on_lots_lineEdit_in_complement_infomation_page_textChanged(self,text):
+    def on_lots_lineEdit_in_complement_infomation_page_textChanged(self, text):
         '''这个输入应该只能输入数字'''
         self.show_lots_lineEdit_label.setText(f"={text}份")
-
 
     def test(self):
         tes = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 10, 46.4, 4640000, "1809045", 650,
@@ -242,12 +238,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_test_pushButton_clicked(self):
 
-        enquiry_feasibility_request_model = EnquiryFeasibilityRequestModel(self,"询价","开仓")
-        print("期权请求数据包内容-->",json.loads(enquiry_feasibility_request_model.get_json()))
-
-
-
-
+        enquiry_feasibility_request_model = EnquiryFeasibilityRequestModel(self, "询价", "开仓")
+        print("期权请求数据包内容-->", json.loads(enquiry_feasibility_request_model.get_json()))
 
     def on_test_signal(self):
 
@@ -350,11 +342,6 @@ class App(QApplication):
         # self.gui.show()
 
         loop.run_forever()
-
-
-
-
-
 
 
 if __name__ == '__main__':

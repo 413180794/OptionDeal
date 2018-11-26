@@ -96,6 +96,10 @@ class DataInteraction:
             logger.warning(e)
             self.loginDialogControl.login_pushButton.setDisabled(False)
             self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接超时")
+        except ConnectionResetError as e:
+            logger.warning(e)
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接被对方重设")
         else:
             # 连接上以后发送一个登录请求
             print(self.json)

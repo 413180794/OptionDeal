@@ -15,7 +15,7 @@ class LoginDialogPropertyModel(Model):
     property_to_real_name = {"user_name": "用户名", "password": "密码", "intranet_server_ip": "内网服务器IP地址",
                              "intranet_server_port": "端口号", "local_proxy_server_port": "代理服务器端口号"}
 
-    def __init__(self, loginDialogControl, client_type="transaction"):
+    def __init__(self, loginDialogControl, client_type="Hedge"):
         self.loginDialogContorl = loginDialogControl
         self.user_name = self.loginDialogContorl.get_user_name()
         self.password = self.loginDialogContorl.get_password_real()

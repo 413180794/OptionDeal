@@ -21,6 +21,21 @@ from UIModel.loginFailedModel import LoginFailedModel
 from UIModel.loginSuccessModel import LoginSuccessModel
 from UIView.loginDialog import Ui_LoginDialog
 
+def findSubStr(substr, str, i):
+    count = 0
+    while i > 0:
+        index = str.find(substr)
+        if index == -1:
+            return -1
+        else:
+            str = str[index+1:]
+            i -= 1
+            count = count + index + 1
+    return count - 1
+
+def insert(original, new, pos):
+    '''Inserts new inside original at pos.'''
+    return original[:pos] + new + original[pos:]
 
 class LoginDialogControl(QDialog, Ui_LoginDialog):
     login_success_signal = pyqtSignal(dict)  # 登录成功信号
@@ -41,7 +56,14 @@ class LoginDialogControl(QDialog, Ui_LoginDialog):
         '''登录到到签约服务器'''
         # logger.info("登录到签约服务器-->" + str(self.if_connect_to_signing_server()))
         # print(self.if_connect_to_signing_server())
-        self.data_interaction_signing_server.connect_to_sever(url + ":" + port, login_request_json)
+        index = findSubStr("/",url,3)
+        print(index)
+        if index != -1:
+            url = insert(url, ":"+port, index)
+        else:
+            url = url + ":" + port
+        print(url)
+        self.data_interaction_signing_server.connect_to_sever(url, login_request_json)
 
     @pyqtSlot()
     def on_login_pushButton_clicked(self):
@@ -51,7 +73,7 @@ class LoginDialogControl(QDialog, Ui_LoginDialog):
         '''
         # 如果初始化时候没有建立连接，那么点击登录键的时候再次建立一次
         # self.mainFormControl.connect_to_signing_server() 登录应该由loginDialogPropertyModel做出
-        self.lineedit_empty_Label.setText("1234123123")
+        self.lineedit_empty_Label.setText("")
         self.lineedit_empty_Label.repaint()
         loginDialogPropertyModel = LoginDialogPropertyModel(self)
         state = loginDialogPropertyModel.check()
@@ -155,4 +177,10 @@ class LoginApp(QApplication):
 
 
 if __name__ == '__main__':
+    # url = 'ws://39.96.20.147:8000/ws/OptionsFuturesTradingPlatform/ll/'
+    #
+    # x = findSubStr("/",url,3)
+    # print(url)
+    # x = insert(url,":8000",x)
+    # print(x)
     LoginApp()
