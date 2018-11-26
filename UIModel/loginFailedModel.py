@@ -22,8 +22,7 @@ class LoginFailedModel(Model):
     def failure_reason(self):
         return self._failure_reason
 
-    def get_json(self):
-        raise NotImplemented
+
 
 
 if __name__ == '__main__':

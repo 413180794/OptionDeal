@@ -5,6 +5,7 @@
 # @File    : dataInteraction.py
 # @Software: PyCharm
 import asyncio
+import concurrent
 import json
 import logging
 import pathlib
@@ -13,22 +14,40 @@ import ssl
 
 import websockets
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
 handler = logging.FileHandler("main_log.txt")
-handler.setLevel(logging.INFO)
+handler.setLevel(logging.WARNING)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ssl_context.load_verify_locations(
-    pathlib.Path(__file__).with_name('localhost.pem'))
 
 
+# ssl_context.load_verify_locations(
+#     pathlib.Path(__file__).with_name('localhost.pem'))
+
+'''
+登录流程
+    1.用户填写登录框信息
+    2.点击登陆按钮 -- > on_login_pushButton_clicked()
+        1.登录框中登录状态修改为""
+        2.实例化登录属性(loginDialogPropertyModel)
+        3.调用上述对象的check()方法，检查登录框中输入框是否符合要求-->不可为空
+            1.如果为空，提示该输入框为空，并返回1
+            2.如果不为空，返回0
+        4.如果check()方法返回1，结束该函数
+        5.如果check()方法返回0,调用上述对象login()方法
+            1.调用登录框控制器中函数向服务器发送登录文件
+            2.等待接收登录结果
+            3.登录失败、超时、连接中断都会造成界面显示错误信息
+        6.如果登录成功，打开主界面
+        7.如果登录失败，显示失败原因，并与服务器断开连接，如果不断开连接，客户端将会持续接收服务器信息
+'''
 class DataInteraction:
-    def __init__(self, loop, mainFormControl):
+    def __init__(self, loop, mainFormControl,loginDialogControl):
         self.loop = loop
+        self.loginDialogControl = loginDialogControl
         self.mainFormControl = mainFormControl
         self.web_socket = None
         self.url = None
@@ -39,58 +58,103 @@ class DataInteraction:
 
     def connect_to_sever(self, url, login_request_json=None):
         self.url = url
+        print(login_request_json)
         self.json = login_request_json
         self.loop.create_task(self._connect_to_server())
+
     def disconnect_to_server(self):
         ''''''
 
         asyncio.ensure_future(self.web_socket.close())
+
     async def _connect_to_server(self):
         try:
             # 有可能连接不上
+            self.web_socket = await asyncio.wait_for(websockets.connect(self.url), timeout=10)
 
-            self.web_socket = await websockets.connect(self.url, ssl=ssl_context,timeout=10)
         except ConnectionRefusedError as e:
             # 如果连接被拒绝登录界面应该做出响应
-            self.mainFormControl.change_loginDialog_lineedit_empty_label_text("无法连接服务器")
-            # self.mainForm.loginDialog.lineedit_empty_Label.setText("无法连接服务器")
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("无法连接服务器")
             logger.warning(e)
         except websockets.exceptions.InvalidURI as e:
-            self.mainFormControl.change_loginDialog_lineedit_empty_label_text("无效的地址")
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("无效的地址")
             logger.warning(e)
         except socket.gaierror as e:
-            self.mainFormControl.change_loginDialog_lineedit_empty_label_text("未知的名称或服务")
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("未知的名称或服务")
+        except ssl.SSLError as e:
+            logger.warning(e)
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("错误的SSL证书")
+        except ValueError as e:
+            logger.error(e)
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("端口号范围为0-65535")
+        except concurrent.futures._base.TimeoutError as e:
+            logger.warning(e)
+            self.loginDialogControl.login_pushButton.setDisabled(False)
+            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接超时")
         else:
             # 连接上以后发送一个登录请求
+            print(self.json)
             if self.json is not None:
-                await self._send_data(self.json) # 发送完毕以后才执行等待接收数据
+                await self._send_data(self.json)  # 发送完毕以后才执行等待接收数据
+                try:
 
-            await self._data_receive()  # 连接后开始等待数据
+                    receive_data = await asyncio.wait_for(self.web_socket.recv(),timeout=10)
+                    receive_data = json.loads(receive_data)
+                    purpose = receive_data.get("purpose", None)
+                    getattr(self.loginDialogControl, purpose + "_signal").emit(receive_data)
+                except concurrent.futures._base.TimeoutError as e:
+                    '''10秒后还没有收到数据'''
+                    logger.info(e)
+                    self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("网络超时")
+                    self.loginDialogControl.login_pushButton.setDisabled(False)
+                except websockets.exceptions.ConnectionClosed as e:
+                    self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接已经断开")
+                    self.loginDialogControl.login_pushButton.setDisabled(False)
+                else:
+                    await self._data_receive()  # 连接后开始等待数据
 
     async def _data_receive(self):
         while True:
             try:
                 receive_data = await self.web_socket.recv()
+                print(receive_data)
             except AttributeError as e:
                 logger.warning(e)
                 break
             except websockets.exceptions.ConnectionClosed as e:
-                print("已经断开",self.web_socket.closed)
+                print("已经断开", self.web_socket.closed)
+
                 logger.warning(e)
+                # 断开后，提示断开连接
+
                 break
             else:
                 receive_data = json.loads(receive_data)  # 收到的json消息
                 purpose = receive_data.get("purpose", None)  # 判断该包的作用
                 # 根据purpose 发送相应的信号给主控制
-                getattr(self.mainFormControl,purpose+"_signal").emit(receive_data)
+                getattr(self.mainFormControl, purpose + "_signal").emit(receive_data)
+
     def send_data(self, data):
         self.loop.create_task(self._send_data(data))
+        # asyncio.wait_for(self._send_data(data),timeout=10,loop=self.loop)
 
     async def _send_data(self, data):
         '''向其发送数据'''
-        print("self.web_socket:",self.web_socket)
-        if self.web_socket.closed:# 如果连接已经断开了,那么重新连接
+        print("self.web_socket:", self.web_socket)
+        if self.web_socket.closed:  # 如果连接已经断开了,那么重新连接
+            # try:
+            #     await asyncio.wait_for(self._connect_to_server(),timeout=10) # 连接服务器，如果十秒后没有响应提示连接失败
+            # except concurrent.futures._base.TimeoutError as e:
+            #     logger.info(e)
+            #     print("")
+            #     return
             await self._connect_to_server()
-        else:
-            print("发送数据")
-            await self.web_socket.send(data)
+
+        print("发送数据", data)
+
+        await asyncio.wait_for(self.web_socket.send(data), timeout=10)

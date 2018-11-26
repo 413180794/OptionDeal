@@ -8,12 +8,11 @@ import websockets
 from PyQt5 import QtGui, QtCore, QtWidgets
 from quamash import QEventLoop
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp
 
-from UIControl.dataInteraction import DataInteraction
-from UIControl.loginDialogControl import LoginDialogControl
-from UIModel.loginFailedModel import LoginFailedModel
-from UIModel.loginSuccessModel import LoginSuccessModel
+
+from UIModel.enquiryFeasibilityRequestModel import EnquiryFeasibilityRequestModel
+
 from UIModel.optionEssentialInfoModel import OptionEssentialInfoModel
 from UIModel.optionInformationModel import OptionInformationModel
 from UIModel.requestEssentialInfoModel import RequestEssentialInfoModel
@@ -37,35 +36,33 @@ logger.addHandler(handler)
 logger.addHandler(console)
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ssl_context.load_verify_locations(
-    pathlib.Path(__file__).with_name('localhost.pem'))
+# ssl_context.load_verify_locations(
+#     pathlib.Path(__file__).with_name('localhost.pem'))
 
 widget_name_lineEdit = {"行权价": "strike_price_lineEdit", "向下止盈": "target_profit_lineEdit"}
 time_widget_name = {"最近到期日": "date_due"}
 
 
+
 class MainFormControl(QMainWindow, Ui_MainWindow):
-    '''在设计上，我们认为MainFormControl是一个上帝角色，它不仅显示了自己，还可以控制所有的子窗口，我们
-    要在这个类中写出控制其他子窗口的函数，以此来达到“最小知识原则” '''
+
     testSigal = pyqtSignal()
-    login_success_signal = pyqtSignal(dict)  # 登录成功信号
-    login_failed_signal = pyqtSignal(dict)  # 登录失败信号
+
     opt_ess_info_signal = pyqtSignal(dict) # 收到期权基本信息数据包 的信号
     def __init__(self, loop):
         super(MainFormControl, self).__init__()
         self.setupUi(self)
         self.loop = loop
-        self.loginDialog = LoginDialogControl(self)
-        self.data_interaction_signing_server = DataInteraction(self.loop, self)
-        self.loginDialog.show()
+
+        self.data_interaction_signing_server = None
+        # self.loginDialog.show()
 
         # signal
         self.testSigal.connect(self.on_test_signal)
-        self.login_success_signal.connect(self.on_login_success_signal)
-        self.login_failed_signal.connect(self.on_login_failed_signal)
+
         self.opt_ess_info_signal.connect(self.on_opt_ess_info_signal)
         #
-
+        # self.lots_lineEdit_in_complement_infomation_page.textChange(self.on_lots_lineEdit_in_complement_infomation_page_textChange)
         # 注意这个六个赋值，原来QTableWidget是没有option_info_obj_list的，这是我强行添加的属性，用于保存每一条信息对象
         # 在on_on_way_for_guest_tableWidget_cellClicked 函数中可以体现出它的好处，方便的取到每一条表格中的数据对象
         self.on_way_for_guest_tableWidget.option_info_obj_list = []
@@ -94,6 +91,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         ] # 次主力合约的所有控件
         #
 
+
         self.test()
 
         # self.loop.create_task(self.connect_test())
@@ -105,12 +103,19 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_cancel_pushButton_in_open_check_feasibility_page_clicked(self):
         '''点击取消 回到控制页面'''
+
         self.stackedWidget.setCurrentWidget(self.control_module_page)
 
     @pyqtSlot()
     def on_sell_new_option_action_triggered(self):
         '''点击销售新期权,页面跳转'''
+        print("销售")
         self.stackedWidget.setCurrentWidget(self.open_check_feasibility_page)
+
+    @pyqtSlot()
+    def on_action_triggered(self):
+        qApp.exit(888)
+
 
     @pyqtSlot()
     def on_next_pushButton_in_open_check_feasibility_page_clicked(self):
@@ -124,12 +129,21 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     def on_opt_ess_info_signal(self,json):
         '''
         如果收到了 期权基本信息数据包,将会调用此函数,执行以下步骤
+            0.删除期货品种代码中的内容
             1.由收到的json构建期权基本信息数据包
             2.进入信息补全页面,并且利用基本信息数据包填写信息补全页面的一部分的信息
+                0.期货合约代码
+                1.最远到期日
+                2.主力合约最大手数
+                3.次主力合约的最大手数（如果有），如果没有，则不显示
+                4.主力合约代码
+                5.次主力合约代码（如果有）
         '''
+        self.fvcode_lineEdit.clear()  # 删除期货品种代码中的内容
         option_essential_info_model = OptionEssentialInfoModel.from_json(self,json)
         self.stackedWidget.setCurrentWidget(self.complement_infomation_page)
         option_essential_info_model.set_show_fvcode_label_text()
+        option_essential_info_model.set_furthest_date_due_label_text()
         option_essential_info_model.set_main_max_lots_label_text()
         option_essential_info_model.set_secode_max_lots_label_text()
 
@@ -137,39 +151,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
 
 
-    def on_login_failed_signal(self,json):
-        '''触发登录失败'''
-        login_failed_model = LoginFailedModel.from_json(self,json)
-        # 在登录界面中显示失败的原因
-        self.loginDialog.change_loginDialog_lineedit_empty_label_text(login_failed_model.failure_reason)
-        self.data_interaction_signing_server.disconnect_to_server()
 
-    def on_login_success_signal(self, json):
-        '''
-        触发登录成功,登录成功后,需要做出以下步骤:
-            1.关闭登录界面
-            2.由发送而来的json数据,构建登录成功模型
-                1.该模型对象自动完成动态构建控件
-                2.该模型对象自动将userid,lineEdit_dict,dateEdit_dict分配给主控制对象
-                    以下四条数据是成功登录以后签约服务器发送而来的, 代表的意思分别是:
-                    1.用户id,唯一标识
-                    2.主力合约中需要填写的价格,键为该价格中文含义,值为该价格输入框的变量名
-                    3.次主力合约中需要填写的价格,键为该价格中文含义,值为该价格输入框的变量名
-                    4.需要填写的日期,键为该日期的中文含义,值为该日期输入框的变量名
-                    self.userid = None
-                    self.main_lineEdit_dict = None
-                    self.second_lineEdit_dict = None
-                    self.dateEdit_dict = None
-        '''
-        logger.info("登录成功")
-        # self.loginDialog.setVisible(False)  # 隐藏登录界面
-        self.loginDialog.close()
-        LoginSuccessModel.from_json(self, json)  #
-        # print(self.userid)
-        # print(self.main_lineEdit_dict)
-        # print(self.second_lineEdit_dict)
-        # print(self.dateEdit_dict)
-        self.show()  # 打开主界面
 
     def send_to_signing_server(self, json):
         '''向签约服务器发送数据'''
@@ -179,11 +161,12 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         '''判断是否连接到签约服务器'''
         return False if self.data_interaction_signing_server.web_socket is None else True
 
-    def login_to_signing_server(self, url, port, login_request_json):
-        '''登录到到签约服务器'''
-        logger.info("登录到签约服务器-->" + str(self.if_connect_to_signing_server()))
-        # print(self.if_connect_to_signing_server())
-        self.data_interaction_signing_server.connect_to_sever(url + ":" + port, login_request_json)
+
+    @pyqtSlot(str)
+    def on_lots_lineEdit_in_complement_infomation_page_textChanged(self,text):
+        '''这个输入应该只能输入数字'''
+        self.show_lots_lineEdit_label.setText(f"={text}份")
+
 
     def test(self):
         tes = OptionInformationModel(self, "S79426", "壹号土猪", "M1901", "认购止盈", 10, 46.4, 4640000, "1809045", 650,
@@ -259,7 +242,12 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_test_pushButton_clicked(self):
 
-        self.main_strike_price_lineEdit.hide()
+        enquiry_feasibility_request_model = EnquiryFeasibilityRequestModel(self,"询价","开仓")
+        print("期权请求数据包内容-->",json.loads(enquiry_feasibility_request_model.get_json()))
+
+
+
+
 
     def on_test_signal(self):
 
@@ -360,7 +348,13 @@ class App(QApplication):
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
         # self.gui.show()
+
         loop.run_forever()
+
+
+
+
+
 
 
 if __name__ == '__main__':

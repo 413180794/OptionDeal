@@ -10,9 +10,6 @@ from UIModel.model import Model
 class OptionEssentialInfoModel(Model):
     '''期权基本信息数据包,由签约服务器发送给交易端'''
 
-    def get_json(self):
-        pass
-
     def __init__(self, mainFormControl, purpose, fvcode, main_contract_code, main_lots, second_contract_code="",
                  second_lots=""):
         self.mainFormControl = mainFormControl
@@ -23,7 +20,11 @@ class OptionEssentialInfoModel(Model):
         self._second_contract_code = second_contract_code
         self._second_lots = second_lots
         if not self.if_has_second_contract():
+            print("隐藏")
             self.hide_second_contract()
+        else:
+            print("显示")
+            self.show_second_contract()
     @property
     def fvcode(self):
         return self._fvcode
@@ -47,8 +48,12 @@ class OptionEssentialInfoModel(Model):
     def hide_second_contract(self):
         '''隐藏次主力合约的控件'''
         for second_widget in self.mainFormControl.second_contract_widget:
-
             second_widget.hide()
+
+    def show_second_contract(self):
+        for second_widget in self.mainFormControl.second_contract_widget:
+            second_widget.show()
+
     def if_has_second_contract(self):
         '''是否含有次主力合约'''
         return False if self.second_contract_code == "" else True
@@ -57,11 +62,23 @@ class OptionEssentialInfoModel(Model):
         '''设置期货合约代码标签的内容'''
         self.mainFormControl.show_fvcode_label.setText(self.fvcode)
 
+
     def set_main_max_lots_label_text(self):
         self.mainFormControl.main_max_lots_label.setText(str(self.main_lots))
 
     def set_secode_max_lots_label_text(self):
-        self.mainFormControl.second_max_lots_label.setText(str(self.second_lots))
+        if self.if_has_second_contract():
+            self.mainFormControl.second_max_lots_label.setText(str(self.second_lots))
+
+    def set_furthest_date_due_label_text(self):
+        self.mainFormControl.furthest_date_due_label.setText(self.mainFormControl.furthest_date_due_dateEdit.text())
+
+    def set_main_contract_code_label_text(self):
+        self.mainFormControl.main_contract_code_label.setText(self.main_contract_code)
+
+    def set_second_contract_code_label_text(self):
+        if self.if_has_second_contract():
+            self.mainFormControl.second_contract_code_label.setText(self.second_contract_code)
 
     @classmethod
     def from_json(cls, mainFormControl, json):

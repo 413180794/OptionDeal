@@ -22,7 +22,6 @@ class RequestEssentialInfoModel(Model):
         self.purpose = "req_ess_info"
         self.furthest_date_due = self.str_to_time_stamp(self.mainFormControl.furthest_date_due_dateEdit.text())
         self.fvcode = self.mainFormControl.fvcode_lineEdit.text()
-        print(self.furthest_date_due)
 
     def get_json(self):
         return json.dumps(
@@ -33,10 +32,7 @@ class RequestEssentialInfoModel(Model):
             }
         )
 
-    def str_to_time_stamp(self, date_str):
-        '''2018/12/12 ---> 转化为时间戳'''
-        time_now = time.mktime(time.strptime(date_str, '%Y/%m/%d'))
-        return time_now
+
 
     def send_json_to_signing_server(self):
         '''发送json给签约服务器'''

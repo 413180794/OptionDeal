@@ -78,7 +78,7 @@ class OptionInformationModel(Model):
         tableWidget.option_info_obj_list.append(self)
         tableWidget.insertRow(tableWidget.rowCount())
         for column in range(tableWidget.columnCount()):
-            print(self.table_data[column])
+            # print(self.table_data[column])
             item = QTableWidgetItem(str(self.table_data[column]))
             item.setToolTip(str(self.table_data[column]))
             tableWidget.setItem(tableWidget.rowCount() - 1, column, item)

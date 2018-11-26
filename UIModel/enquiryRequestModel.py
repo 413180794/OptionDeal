@@ -33,9 +33,7 @@ class EnquiryRequestModel(Model):
     '''询价请求数据包'''
 
 
-    @classmethod
-    def from_json(cls):
-        raise NotImplemented
+
 
     def __init__(self, fvcode, option_type, mainForm, contract_code, peprice, days_remaining,
                  contract_code_2=None, peprice_2=None, days_remaining_2=None):
