@@ -13,10 +13,12 @@ class LoginSuccessModel(Model):
     '''收到登录成功数据包'''
     if_add_widget = False
 
-    def __init__(self, mainFormControl, userid, type_option_combox, main_lineEdit_dict, second_lineEdit_dict,
+    def __init__(self, mainFormControl, userid, company_name, type_option_combox, main_lineEdit_dict,
+                 second_lineEdit_dict,
                  dateEdit_dict):
         self.mainFormControl = mainFormControl
-        self._userid = userid
+        self._user_name, self._client_type = userid.split("_")
+        self._company_name = company_name
         self.type_option_combox = type_option_combox
         self._main_lineEdit_dict = main_lineEdit_dict
         self._second_lineEdit_dict = second_lineEdit_dict
@@ -32,18 +34,15 @@ class LoginSuccessModel(Model):
             self.change_type_option_combox(self.mainFormControl.option_type_comboBox)
             LoginSuccessModel.if_add_widget = True
 
-        self.mainFormControl.userid = self.userid
+        self.mainFormControl.user_name = self._user_name
+        self.mainFormControl.client_type = self._client_type
+        self.mainFormControl.company_name = self._company_name
         self.mainFormControl.main_lineEdit_dict = self.main_lineEdit_dict
-        print(self.main_lineEdit_dict)
         self.mainFormControl.second_lineEdit_dict = self.second_lineEdit_dict
         self.mainFormControl.dateEdit_dict = self.dateEdit_dict
         for second_lineEdit in self.second_lineEdit_dict.values():
             self.mainFormControl.second_contract_widget.append(getattr(self.mainFormControl, second_lineEdit))
             self.mainFormControl.second_contract_widget.append(getattr(self.mainFormControl, second_lineEdit + "name"))
-
-    @property
-    def userid(self):
-        return self._userid
 
     @property
     def main_lineEdit_dict(self):
@@ -57,10 +56,9 @@ class LoginSuccessModel(Model):
     def dateEdit_dict(self):
         return self._dateEdit_dict
 
-
     @classmethod
     def from_json(cls, mainFormControl, json):
-        return cls(mainFormControl, json.get('userid'), json.get('type_option_combox'),
+        return cls(mainFormControl, json.get('userid'), json.get("company_name"),json.get('type_option_combox'),
                    json.get("main_lineEdit_widget"),
                    json.get("second_lineEdit_widget"), json.get("time_widget"))
 
@@ -106,7 +104,6 @@ class LoginSuccessModel(Model):
             label = QtWidgets.QLabel(page)
             label.setObjectName(lineEdit_variable)
             label.setText(lineEdit_name)  # 设置该标签的名称
-
 
             formLayout.setWidget(count, QtWidgets.QFormLayout.LabelRole, label)
             setattr(self.mainFormControl, lineEdit_variable + "name", label)

@@ -1,3 +1,4 @@
+import collections
 import json
 import pathlib
 import ssl
@@ -7,9 +8,10 @@ import logging
 import websockets
 from PyQt5 import QtGui, QtCore, QtWidgets
 from quamash import QEventLoop
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp
 
+from UIModel.chatReqMsgModel import ChatReqMsgModel
 from UIModel.enquiryFeasibilityRequestModel import EnquiryFeasibilityRequestModel
 
 from UIModel.optionEssentialInfoModel import OptionEssentialInfoModel
@@ -60,6 +62,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.testSigal.connect(self.on_test_signal)
         self.users_info_update_signal.connect(self.on_users_info_update_signal)
         self.opt_ess_info_signal.connect(self.on_opt_ess_info_signal)
+        self.hedge_listWidget.itemClicked.connect(self.on_hedge_listWidget_itemClicked)
+        self.transaction_listWidget.itemClicked.connect(self.on_transaction_listWidget_itemClicked)
         #
         # self.lots_lineEdit_in_complement_infomation_page.textChange(self.on_lots_lineEdit_in_complement_infomation_page_textChange)
         # 注意这个六个赋值，原来QTableWidget是没有option_info_obj_list的，这是我强行添加的属性，用于保存每一条信息对象
@@ -90,14 +94,39 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         ]  # 次主力合约的所有控件
         #
 
+        self.transaction_users = collections.defaultdict(list)  # 保存所有交易端的用户 键值类型为   公司名:[用户1,用户2,用户3]
+        self.hedge_users = collections.defaultdict(list)
+
         self.test()
 
         # self.loop.create_task(self.connect_test())
 
         # self.on_way_for_guest_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-    # async def connect_test(self):
-    #     self.websocket = await websockets.connect("wss://192.168.0.112:8888/traecho")
+        # async def connect_test(self):
+        #     self.websocket = await websockets.connect("wss://192.168.0.112:8888/traecho")
+
+    def on_transaction_listWidget_itemClicked(self, item):
+        self.show_users_listWidget.clear()
+        self.hedge_listWidget.setCurrentIndex(QModelIndex())
+        for user_name in self.transaction_users[item.text()]:
+            self.show_users_listWidget.addItem(user_name)
+
+    def on_hedge_listWidget_itemClicked(self, item):
+        self.show_users_listWidget.clear()
+        self.transaction_listWidget.setCurrentIndex(QModelIndex())
+        for user_name in self.hedge_users[item.text()]:
+            self.show_users_listWidget.addItem(user_name)
+
+    @pyqtSlot()
+    def on_send_msg_pushButton_clicked(self):
+        hedge_list = self.hedge_listWidget.selectedItems()
+        transaction_list = self.transaction_listWidget.selectedItems()
+        group_list = [item.text() + "_" + "Hedge" for item in hedge_list] + [item.text() + "_" + "Transaction" for item
+                                                                             in transaction_list]
+        chat_req_msg_model = ChatReqMsgModel(self.input_msg_textEdit, self.company_name, self.user_name, group_list,
+                                             self.client_type)
+
     @pyqtSlot()
     def on_cancel_pushButton_in_open_check_feasibility_page_clicked(self):
         '''点击取消 回到控制页面'''
@@ -145,11 +174,27 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         option_essential_info_model.set_secode_max_lots_label_text()
 
     def on_users_info_update_signal(self, json):
-        '''收到了用户信息,构建updateUsersInfoModel,删除两个列表中除了第一行所有用户名,根据用户名列表更新该列'''
+        '''收到了用户信息,构建updateUsersInfoModel,删除两个列表中除了第一行所有用户名,根据用户名列表更新该列
+        1.删除所有公司
+        2.添加新公司
+        3.更新公司下的用户
+
+        '''
         print(json)
         update_users_info_model = UpdateUsersInfoModel.from_json(self, json)
         update_users_info_model.remove_all_item()
-        update_users_info_model.add_new_item()
+        online_users = update_users_info_model.online_users
+        for user_company_group in online_users:
+            user_name, company_name, group_type = user_company_group.split("_")
+            if group_type == "Hedge":
+                self.hedge_users[company_name].append(user_name)
+            elif group_type == "Transaction":
+                self.transaction_users[company_name].append(user_name)
+
+            else:
+                logger.info(group_type + "is wrong")
+                raise ValueError()
+        update_users_info_model.add_all_item(self.hedge_users, self.transaction_users)
 
     def send_to_signing_server(self, json):
         '''向签约服务器发送数据'''
