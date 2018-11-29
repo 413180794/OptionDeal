@@ -32,8 +32,6 @@ class RequestEssentialInfoModel(Model):
             }
         )
 
-
-
     def send_json_to_signing_server(self):
         '''发送json给签约服务器'''
         self.mainFormControl.send_to_signing_server(self.get_json())

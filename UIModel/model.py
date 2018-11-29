@@ -4,6 +4,7 @@
 # @Site    : 
 # @File    : Model.py
 # @Software: PyCharm
+import hashlib
 import time
 from abc import ABCMeta, abstractmethod
 '''
@@ -36,6 +37,9 @@ class Model(metaclass=ABCMeta):
         time_now = time.strftime(format_str,time.localtime(time_stamp))
         return time_now
 
+    def get_password(self, password_real):
+        '''获得登录界面密码的md5加密'''
+        return hashlib.md5(password_real.encode('utf-8')).hexdigest()
 
 if __name__ == '__main__':
     x = Model()

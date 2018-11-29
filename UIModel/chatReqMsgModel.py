@@ -19,7 +19,7 @@ class ChatReqMsgModel(Model):
         self.group_list = group_list
         self.client_type = client_type
         self.userid = self.user_name + "_" + self.client_type
-        self.message = input_msg_textEdit.document()
+        self._message = input_msg_textEdit.document().toPlainText()
 
     def get_json(self):
         return json.dumps({
@@ -30,3 +30,10 @@ class ChatReqMsgModel(Model):
             "userid": self.userid,
             "message": self.message
         })
+
+    @property
+    def message(self):
+        return self._message
+
+    def __str__(self):
+        return str(json.loads(self.get_json()))

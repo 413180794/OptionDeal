@@ -47,9 +47,6 @@ class LoginDialogPropertyModel(Model):
                                                         self.get_json())
         # self.mainFormControl.send_to_signing_server(self.login_request_json())
 
-    def get_password(self, password_real):
-        '''获得登录界面密码的md5加密'''
-        return hashlib.md5(password_real.encode('utf-8')).hexdigest()
 
     def get_json(self):
         '''返回登录请求json数据包'''

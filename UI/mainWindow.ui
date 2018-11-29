@@ -3832,7 +3832,8 @@
     <property name="title">
      <string>选项</string>
     </property>
-    <addaction name="action_4"/>
+    <addaction name="reset_password_action"/>
+    <addaction name="set_temp_password_action"/>
     <addaction name="action_5"/>
     <addaction name="action_6"/>
     <addaction name="action_7"/>
@@ -3857,7 +3858,7 @@
     <string>销售新期权</string>
    </property>
   </action>
-  <action name="action_4">
+  <action name="reset_password_action">
    <property name="text">
     <string>更改密码</string>
    </property>
@@ -3880,6 +3881,11 @@
   <action name="action_8">
    <property name="text">
     <string>关于软件</string>
+   </property>
+  </action>
+  <action name="set_temp_password_action">
+   <property name="text">
+    <string>授权密码</string>
    </property>
   </action>
  </widget>

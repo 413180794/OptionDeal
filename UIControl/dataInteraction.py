@@ -23,7 +23,6 @@ handler.setFormatter(formatter)
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
-
 # ssl_context.load_verify_locations(
 #     pathlib.Path(__file__).with_name('localhost.pem'))
 
@@ -44,8 +43,10 @@ ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         6.如果登录成功，打开主界面
         7.如果登录失败，显示失败原因，并与服务器断开连接，如果不断开连接，客户端将会持续接收服务器信息
 '''
+
+
 class DataInteraction:
-    def __init__(self, loop, mainFormControl,loginDialogControl):
+    def __init__(self, loop, mainFormControl, loginDialogControl):
         self.loop = loop
         self.loginDialogControl = loginDialogControl
         self.mainFormControl = mainFormControl
@@ -107,7 +108,7 @@ class DataInteraction:
                 await self._send_data(self.json)  # 发送完毕以后才执行等待接收数据
                 try:
 
-                    receive_data = await asyncio.wait_for(self.web_socket.recv(),timeout=10)
+                    receive_data = await asyncio.wait_for(self.web_socket.recv(), timeout=10)
                     receive_data = json.loads(receive_data)
                     purpose = receive_data.get("purpose", None)
                     getattr(self.loginDialogControl, purpose + "_signal").emit(receive_data)
@@ -141,7 +142,10 @@ class DataInteraction:
                 receive_data = json.loads(receive_data)  # 收到的json消息
                 purpose = receive_data.get("purpose", None)  # 判断该包的作用
                 # 根据purpose 发送相应的信号给主控制
-                getattr(self.mainFormControl, purpose + "_signal").emit(receive_data)
+                try:
+                    getattr(self.mainFormControl, purpose + "_signal").emit(receive_data)
+                except AttributeError as e:
+                    logger.error(e)
 
     def send_data(self, data):
         self.loop.create_task(self._send_data(data))
@@ -149,16 +153,13 @@ class DataInteraction:
 
     async def _send_data(self, data):
         '''向其发送数据'''
-        print("self.web_socket:", self.web_socket)
+        print("self.web_socket:", self.web_socket.closed)
         if self.web_socket.closed:  # 如果连接已经断开了,那么重新连接
-            # try:
-            #     await asyncio.wait_for(self._connect_to_server(),timeout=10) # 连接服务器，如果十秒后没有响应提示连接失败
-            # except concurrent.futures._base.TimeoutError as e:
-            #     logger.info(e)
-            #     print("")
-            #     return
             await self._connect_to_server()
 
         print("发送数据", data)
-
-        await asyncio.wait_for(self.web_socket.send(data), timeout=10)
+        try:
+            await asyncio.wait_for(self.web_socket.send(data), timeout=10)
+        except concurrent.futures._base.TimeoutError as e:
+            # 如果10秒还没有将这个数据发送出去.则肯定出问题了.我们可以根据这个data来判断什么包没有发出去,以此来做出相应
+            print(e)
