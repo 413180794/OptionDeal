@@ -10,7 +10,7 @@ import websockets
 from PyQt5 import QtGui, QtCore, QtWidgets
 from quamash import QEventLoop
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp, QTableWidgetItem
 
 from UIControl.resetSecretDialogControl import ResetSecretDialogControl
 from UIControl.setTempSecretDialogControl import SetTempSecretDialogControl
@@ -59,6 +59,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     update_password_success_signal = pyqtSignal(dict)
     set_temp_password_failed_signal = pyqtSignal(dict)
     set_temp_password_success_signal = pyqtSignal(dict)
+    option_table_info_signal = pyqtSignal(dict)
 
     def __init__(self, loop):
         super(MainFormControl, self).__init__()
@@ -78,6 +79,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.transaction_listWidget.itemClicked.connect(self.on_transaction_listWidget_itemClicked)
         self.update_password_failed_signal.connect(self.on_update_password_failed_signal)
         self.update_password_success_signal.connect(self.on_update_password_success_signal)
+        self.option_table_info_signal.connect(self.on_option_table_info_signal)
         # self.set_temp_password_failed_signal.connect(self.on_set_temp_password_failed_signal)
         # self.set_temp_password_success_signal.conect(self.on_set_temp_password_success_signal)
 
@@ -112,8 +114,6 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.transaction_users = collections.defaultdict(list)  # 保存所有交易端的用户 键值类型为   公司名:[用户1,用户2,用户3]
         self.hedge_users = collections.defaultdict(list)
 
-        self.test()
-
         self.html_list = []
         # self.loop.create_task(self.connect_test())
 
@@ -121,6 +121,30 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         # async def connect_test(self):
         #     self.websocket = await websockets.connect("wss://192.168.0.112:8888/traecho")
+
+    def on_option_table_info_signal(self, json):
+        print("!@#!@#!@#!@$!@$!")
+        table_data = json['table_data']
+        state = json['state']
+        tableWidget = getattr(self,self.tab_name_dict.get(state))
+        tableWidget.option_info_obj_list.append(json)
+        tableWidget.insertRow(tableWidget.rowCount())
+        column = 0
+        for table_name,table_value in table_data.items():
+            item = QTableWidgetItem(str(table_value))
+            item.setToolTip(str(table_value))
+            tableWidget.setItem(tableWidget.rowCount() - 1, column, item)
+            column += 1
+
+    def _insert_to_table(self, tableWidget):
+        '''将数据插入到表格中'''
+        tableWidget.option_info_obj_list.append(self)
+        tableWidget.insertRow(tableWidget.rowCount())
+        for column in range(tableWidget.columnCount()-1):
+            # print(self.table_data[column])
+            item = QTableWidgetItem(str(self.table_data[column]))
+            item.setToolTip(str(self.table_data[column]))
+            tableWidget.setItem(tableWidget.rowCount() - 1, column, item)
 
     def on_update_password_success_signal(self, json):
         self.reset_secret_dialog_control.update_password_success_signal.emit(json)
@@ -370,6 +394,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         enquiry_feasibility_request_model = EnquiryFeasibilityRequestModel(self, "询价", "开仓")
         print("期权请求数据包内容-->", json.loads(enquiry_feasibility_request_model.get_json()))
+        self.test()
 
     def on_test_signal(self):
 
@@ -385,23 +410,25 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
     def _change_control_module_page(self, option_info_obj):
         '''利用表格中某行数据来修改control_module_page(控制模块)的内容'''
-
-
-        self.transaction_number_label.setText(str(option_info_obj.transaction_number))
-        self.customer_name_label.setText(str(option_info_obj.customer_name))
-        self.contract_code_label.setText(str(option_info_obj.contract_code))
-        self.option_type_label.setText(str(option_info_obj.option_type))
-        self.state_label.setText(str(option_info_obj.state))
-        self.total_price_label.setText(str(option_info_obj.total_price))
-        self.lots_label.setText(str(option_info_obj.lots))
-        self.number_per_hand_label.setText(str(option_info_obj.number_per_hand))
-        self.unit_price_label.setText(str(option_info_obj.unit_price))
-        self.main_strike_price_label.setText(str(option_info_obj.main_strike_price))
-        self.main_exercise_date_label.setText(str(option_info_obj.main_exercise_date))
-        self.second_strike_price_label.setText(str(option_info_obj.second_strike_price))
-        self.second_exercise_date_label.setText(str(option_info_obj.second_exercise_date))
-
-
+        print("change")
+        print(option_info_obj)
+        getattr(self,"state_label_in_control_module_page").setText(str(option_info_obj['state']))
+        for variable,value in option_info_obj['table_data'].items():
+            label = getattr(self,variable+"_label_in_control_module_page")
+            label.setText(str(value))
+        # self.transaction_number_label.setText(str(option_info_obj.transaction_number))
+        # self.customer_name_label.setText(str(option_info_obj.customer_name))
+        # self.contract_code_label.setText(str(option_info_obj.contract_code))
+        # self.option_type_label.setText(str(option_info_obj.option_type))
+        # self.state_label.setText(str(option_info_obj.state))
+        # self.total_price_label.setText(str(option_info_obj.total_price))
+        # self.lots_label.setText(str(option_info_obj.lots))
+        # self.number_per_hand_label.setText(str(option_info_obj.number_per_hand))
+        # self.unit_price_label.setText(str(option_info_obj.unit_price))
+        # self.main_strike_price_label.setText(str(option_info_obj.main_strike_price))
+        # self.main_exercise_date_label.setText(str(option_info_obj.main_exercise_date))
+        # self.second_strike_price_label.setText(str(option_info_obj.second_strike_price))
+        # self.second_exercise_date_label.setText(str(option_info_obj.second_exercise_date))
 
     @pyqtSlot(int, int)
     def on_on_way_for_guest_tableWidget_cellClicked(self, row, column):

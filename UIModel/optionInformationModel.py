@@ -77,7 +77,7 @@ class OptionInformationModel(Model):
         '''将数据插入到表格中'''
         tableWidget.option_info_obj_list.append(self)
         tableWidget.insertRow(tableWidget.rowCount())
-        for column in range(tableWidget.columnCount()):
+        for column in range(tableWidget.columnCount()-1):
             # print(self.table_data[column])
             item = QTableWidgetItem(str(self.table_data[column]))
             item.setToolTip(str(self.table_data[column]))

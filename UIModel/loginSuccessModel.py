@@ -15,7 +15,7 @@ class LoginSuccessModel(Model):
 
     def __init__(self, mainFormControl, userid, company_name, type_option_combox, main_lineEdit_dict,
                  second_lineEdit_dict,
-                 dateEdit_dict):
+                 dateEdit_dict, tableWidget, control_module_page_label_dict):
         self.mainFormControl = mainFormControl
         self._user_name, self._client_type = userid.split("_")
         self._company_name = company_name
@@ -23,6 +23,8 @@ class LoginSuccessModel(Model):
         self._main_lineEdit_dict = main_lineEdit_dict
         self._second_lineEdit_dict = second_lineEdit_dict
         self._dateEdit_dict = dateEdit_dict
+        self.tableWidget = tableWidget
+        self.control_module_page_label_dict = control_module_page_label_dict
         if not LoginSuccessModel.if_add_widget:
             self.change_dateEdit(self.mainFormControl.complement_infomation_page,
                                  self.mainFormControl.label_name_widget_verticalLayout,
@@ -32,6 +34,8 @@ class LoginSuccessModel(Model):
             self.change_formLayout(self.mainFormControl.second_contract_formLayout, self.second_lineEdit_dict,
                                    self.mainFormControl.complement_infomation_page)
             self.change_type_option_combox(self.mainFormControl.option_type_comboBox)
+            self.set_table(self.tableWidget)
+            self.create_label_to_control_module_page(self.control_module_page_label_dict)
             LoginSuccessModel.if_add_widget = True
 
         self.mainFormControl.user_name = self._user_name
@@ -58,9 +62,10 @@ class LoginSuccessModel(Model):
 
     @classmethod
     def from_json(cls, mainFormControl, json):
-        return cls(mainFormControl, json.get('userid'), json.get("company_name"),json.get('type_option_combox'),
+        return cls(mainFormControl, json.get('userid'), json.get("company_name"), json.get('type_option_combox'),
                    json.get("main_lineEdit_widget"),
-                   json.get("second_lineEdit_widget"), json.get("time_widget"))
+                   json.get("second_lineEdit_widget"), json.get("time_widget"), json.get("tableWidget"),
+                   json.get("control_module_page_label"))
 
     def change_type_option_combox(self, combox):
         for item in self.type_option_combox:
@@ -75,6 +80,34 @@ class LoginSuccessModel(Model):
         label.setAlignment(QtCore.Qt.AlignCenter)
         return label
 
+    def create_label_to_control_module_page(self, tableDict):
+        x, y = 0, 0
+        for name, variable in tableDict.items():
+            verticalLayout = QtWidgets.QVBoxLayout()
+            verticalLayout.setSpacing(0)
+            verticalLayout.setObjectName("verticalLayout" + variable)
+            label = QtWidgets.QLabel(self.mainFormControl.control_module_page)
+            font = QtGui.QFont()
+            font.setBold(False)
+            font.setWeight(50)
+            label.setFont(font)
+            label.setAlignment(QtCore.Qt.AlignCenter)
+            label.setObjectName("label")
+            label.setText(name)
+            verticalLayout.addWidget(label)
+            setattr(self.mainFormControl, variable + "_in_control_module_page",
+                    QtWidgets.QLabel(self.mainFormControl.control_module_page))
+            label2 = getattr(self.mainFormControl, variable+"_in_control_module_page")
+            label2.setFont(font)
+            label2.setAlignment(QtCore.Qt.AlignCenter)
+            label2.setObjectName(variable + "_in_control_module_page")
+            verticalLayout.addWidget(label2)
+            self.mainFormControl.control_model_page_gridLayout.addLayout(verticalLayout, x, y, 1, 1)
+            y += 1
+            if y == 3:
+                x += 1
+                y = 0
+
     def create_dateEdit(self, page, name):
         dateEdit = QtWidgets.QDateEdit(page)
         dateEdit.setObjectName(name)
@@ -87,6 +120,27 @@ class LoginSuccessModel(Model):
             setattr(self.mainFormControl, variable, self.create_dateEdit(page, variable))
             label_verticalLayout.addWidget(label)
             dateEdit_verticalLayout.addWidget(getattr(self.mainFormControl, variable))
+
+    def set_tableWidget(self, tableWidgetName, tableDict):
+        tableWidget = getattr(self.mainFormControl, tableWidgetName)
+        tableWidget.horizontalHeader().setVisible(True)
+        tableWidget.setColumnCount(len(tableDict.values()))
+        tableWidget.horizontalHeader().setCascadingSectionResizes(False)
+        tableWidget.horizontalHeader().setDefaultSectionSize(90)
+        tableWidget.horizontalHeader().setHighlightSections(True)
+        tableWidget.horizontalHeader().setStretchLastSection(False)
+        tableWidget.verticalHeader().setCascadingSectionResizes(True)
+        tableWidget.verticalHeader().setStretchLastSection(False)
+        tableWidget.setSortingEnabled(True)
+        for i, tableName in enumerate(tableDict.keys()):
+            print("1!!!!!!!!!!!!!!!!!!")
+            item = QtWidgets.QTableWidgetItem()
+            tableWidget.setHorizontalHeaderItem(i, item)
+            item.setText(tableName)
+
+    def set_table(self, tableWidget):
+        for tableWidgetName, tableDict in tableWidget.items():
+            self.set_tableWidget(tableWidgetName, tableDict)
 
     def change_formLayout(self, formLayout, widget_name, page):
         '''
