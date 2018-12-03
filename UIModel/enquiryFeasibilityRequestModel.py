@@ -6,6 +6,8 @@
 # @Software: PyCharm
 import json
 
+from PyQt5.QtWidgets import QFormLayout
+
 from UIModel.model import Model
 
 
@@ -21,16 +23,38 @@ class EnquiryFeasibilityRequestModel(Model):
         self._trade_type = trade_type
         self.option_type = self.mainFormControl.option_type_comboBox.currentText()
 
-        self.all_date = self.mainFormControl.dateEdit_dict
+        self.all_date = []
         self.main_tract_code = self.mainFormControl.main_contract_code_label.text()
-        self.main_all_price = self.mainFormControl.main_lineEdit_dict
+        self.main_all_price = []
         self.second_contract_code = self.mainFormControl.second_contract_code_label.text()
-        self.second_all_price = self.mainFormControl.second_lineEdit_dict
-
+        self.second_all_price = []
+        self.get_all_date()
+        self.get_main_all_price()
+        self.get_second_all_price()
         # print("all_date", self.all_date)
         # print("main_all_price", self.main_all_price)
         # print("second_all_price", self.second_all_price)
 
+    def get_all_date(self):
+        '''获得所有日期数据'''
+        self.all_date.clear()
+        for i in range(1,self.mainFormControl.dateEdit_formLayout.rowCount()):
+            dateEdit = self.mainFormControl.dateEdit_formLayout.itemAt(i, QFormLayout.FieldRole).widget()
+            date_time = dateEdit.text()
+            print(date_time)
+            self.all_date.append(date_time)
+    def get_main_all_price(self):
+        self.main_all_price.clear()
+        for i in range(1,self.mainFormControl.main_contract_formLayout.rowCount()):
+            lineEdit = self.mainFormControl.main_contract_formLayout.itemAt(i, QFormLayout.FieldRole).widget()
+            price = lineEdit.text()
+            self.main_all_price.append(price)
+    def get_second_all_price(self):
+        self.second_all_price.clear()
+        for i in range(1,self.mainFormControl.second_contract_formLayout.rowCount()):
+            lineEdit = self.mainFormControl.second_contract_formLayout.itemAt(i, QFormLayout.FieldRole).widget()
+            price = lineEdit.text()
+            self.second_all_price.append(price)
     @property
     def trade_type(self):
         return self._trade_type
@@ -58,38 +82,19 @@ class EnquiryFeasibilityRequestModel(Model):
             "trade_type": self.trade_type,
             "enquiry_type": self.enquiry_type,
             "option_type": self.option_type,
-            "all_date": {
-
-            },
+            "all_date": self.all_date,
             "detail": [
                 {
                     "contract_code": self.main_tract_code,
-                    "all_price": {
-
-                    }
+                    "all_price": self.main_all_price
                 },
                 {
                     "contract_code": self.second_contract_code,
-                    "all_price": {
-
-                    }
+                    "all_price": self.second_all_price
                 }
             ]
 
         }
-        # 扩展 all_date 的内容
-        for variable_name in self.all_date.values():
-            result_json.get('all_date').update({variable_name[:-9]: self.str_to_time_stamp(getattr(self.mainFormControl, variable_name).text())})
-
-        # 扩展主力合约all_price    main_strike_price_lineEdit 去头去尾
-        for variable_name in self.main_all_price.values():
-            result_json.get("detail")[0].get('all_price').update(
-                {variable_name[5:][:-9]: getattr(self.mainFormControl, variable_name).text()})
-        # 扩展主力合约 all_price
-        for variable_name in self.second_all_price.values():
-            result_json.get("detail")[1].get('all_price').update(
-                {variable_name[7:][:-9]: getattr(self.mainFormControl, variable_name).text()})
-
         return json.dumps(result_json)
 
 

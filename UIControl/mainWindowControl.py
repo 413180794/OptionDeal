@@ -7,10 +7,10 @@ import logging
 import time
 
 import websockets
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets, sip
 from quamash import QEventLoop
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex, QStringListModel, Qt
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp, QListView, QFormLayout
 
 from UIControl.resetSecretDialogControl import ResetSecretDialogControl
 from UIControl.setTempSecretDialogControl import SetTempSecretDialogControl
@@ -19,12 +19,15 @@ from UIModel.chatReqMsgModel import ChatReqMsgModel
 from UIModel.enquiryFeasibilityRequestModel import EnquiryFeasibilityRequestModel
 
 from UIModel.optionEssentialInfoModel import OptionEssentialInfoModel
-from UIModel.optionInformationModel import OptionInformationModel
+
 from UIModel.requestEssentialInfoModel import RequestEssentialInfoModel
+from UIModel.tableModel import TableModel
 from UIModel.updateUsersInfoModel import UpdateUsersInfoModel
 from UIView.mainWindow import Ui_MainWindow
 import asyncio
 import uvloop
+
+from learnMVC.richtextlinedit import MyDelegate
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 logger = logging.getLogger(__name__)
@@ -59,6 +62,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     update_password_success_signal = pyqtSignal(dict)
     set_temp_password_failed_signal = pyqtSignal(dict)
     set_temp_password_success_signal = pyqtSignal(dict)
+    option_table_info_signal = pyqtSignal(dict)
 
     def __init__(self, loop):
         super(MainFormControl, self).__init__()
@@ -67,33 +71,52 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.data_interaction_signing_server = None
         self.reset_secret_dialog_control = None
         self.set_temp_secret_dialog_control = None
+        self.on_way_for_company_tableView_model = TableModel(
+            ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
+        self.on_way_for_guest_tableView_model = TableModel(
+            ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
+        self.today_close_for_company_tableView_model = TableModel(
+            ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
+        self.today_close_for_guest_tableView_model = TableModel(
+            ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
+        self.today_open_for_company_tableView_model = TableModel(
+            ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
+        self.today_open_for_guest_tableView_model = TableModel(
+            ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
 
+        self.on_way_for_company_tableView.setModel(self.on_way_for_company_tableView_model)
+        self.on_way_for_guest_tableView.setModel(self.on_way_for_guest_tableView_model)
+        self.today_close_for_company_tableView.setModel(self.today_close_for_company_tableView_model)
+        self.today_close_for_guest_tableView.setModel(self.on_way_for_guest_tableView_model)
+        self.today_open_for_company_tableView.setModel(self.today_open_for_company_tableView_model)
+        self.today_open_for_guest_tableView.setModel(self.today_open_for_guest_tableView_model)
+
+        # 以上的为None的变量在登录成功后才会被初始化
+
+        # test#
+        # test#
         # signal
         self.testSigal.connect(self.on_test_signal)
         self.users_info_update_signal.connect(self.on_users_info_update_signal)
         self.chat_message_to_groups_signal.connect(self.on_chat_message_to_groups_signal)
         self.opt_ess_info_signal.connect(self.on_opt_ess_info_signal)
         self.chat_success_signal.connect(self.on_chat_success_signal)
-        self.hedge_listWidget.itemClicked.connect(self.on_hedge_listWidget_itemClicked)
-        self.transaction_listWidget.itemClicked.connect(self.on_transaction_listWidget_itemClicked)
+        # self.hedge_listWidget.itemClicked.connect(self.on_hedge_listWidget_itemClicked)
+        # self.transaction_listWidget.itemClicked.connect(self.on_transaction_listWidget_itemClicked)
         self.update_password_failed_signal.connect(self.on_update_password_failed_signal)
         self.update_password_success_signal.connect(self.on_update_password_success_signal)
+        self.option_table_info_signal.connect(self.on_option_table_info_signal)
         # self.set_temp_password_failed_signal.connect(self.on_set_temp_password_failed_signal)
         # self.set_temp_password_success_signal.conect(self.on_set_temp_password_success_signal)
 
         # self.lots_lineEdit_in_complement_infomation_page.textChange(self.on_lots_lineEdit_in_complement_infomation_page_textChange)
         # 注意这个六个赋值，原来QTableWidget是没有option_info_obj_list的，这是我强行添加的属性，用于保存每一条信息对象
         # 在on_on_way_for_guest_tableWidget_cellClicked 函数中可以体现出它的好处，方便的取到每一条表格中的数据对象
-        self.on_way_for_guest_tableWidget.option_info_obj_list = []
-        self.on_way_for_company_tableWidget.option_info_obj_list = []
-        self.today_close_for_company_tableWidget.option_info_obj_list = []
-        self.today_close_for_guest_tableWidget.option_info_obj_list = []
-        self.today_open_for_guest_tableWidget.option_info_obj_list = []
-        self.today_open_for_company_tableWidget.option_info_obj_list = []
-        self.tab_name_dict = {"对客在途": "on_way_for_guest_tableWidget", "对公在途": "on_way_for_company_tableWidget",
-                              "对客今开": "today_open_for_guest_tableWidget", "对公今开": "today_open_for_company_tableWidget",
-                              "对客今止": "today_close_for_guest_tableWidget",
-                              "对公今止": "today_close_for_company_tableWidget"}
+        self.tab_name_dict = {"对客在途": "on_way_for_guest_tableView_model", "对公在途": "on_way_for_company_tableView_model",
+                              "对客今开": "today_open_for_guest_tableView_model",
+                              "对公今开": "today_open_for_company_tableView_model",
+                              "对客今止": "today_close_for_guest_tableView_model",
+                              "对公今止": "today_close_for_company_tableView_model"}
         self.old_option_info_obj = None  # 防止一直在点击同一行，一直在触发函数
         self.second_contract_widget = [
             self.second_contract_code_name_label,
@@ -112,7 +135,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.transaction_users = collections.defaultdict(list)  # 保存所有交易端的用户 键值类型为   公司名:[用户1,用户2,用户3]
         self.hedge_users = collections.defaultdict(list)
 
-        self.test()
+        # self.test()
 
         self.html_list = []
         # self.loop.create_task(self.connect_test())
@@ -121,6 +144,88 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         # async def connect_test(self):
         #     self.websocket = await websockets.connect("wss://192.168.0.112:8888/traecho")
+
+    def delete_formLayout_widget(self, formLayout):
+        # formLayout中除了第一行中所有控件
+        for i in range(1, formLayout.rowCount()):
+            formLayout.removeRow(1)
+
+
+    def create_label(self, name):
+        '''在page中创建一个label'''
+        label = QtWidgets.QLabel(self.complement_infomation_page)
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        label.setFont(font)
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        label.setText(name)
+        label.setObjectName(name)
+        return label
+
+    def create_dateEdit(self):
+        '''创建一个dateEdit'''
+        dateEdit = QtWidgets.QDateEdit(self.complement_infomation_page)
+
+        return dateEdit
+    def create_lineEdit(self):
+        lineEdit = QtWidgets.QLineEdit(self.complement_infomation_page)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(lineEdit.sizePolicy().hasHeightForWidth())
+        lineEdit.setSizePolicy(sizePolicy)
+        return lineEdit
+    @pyqtSlot(str)
+    def on_option_type_comboBox_currentTextChanged(self, option_type):
+        '''修改主界面
+        1.  删除dateEdit_widget_verticalLayout中除了第一行所有控件
+            删除label_name_widget_verticalLayout中除了第一行所有控件
+            删除main_contract_formLayout中除了第一行中所有控件
+            删除second_contract_formLayout中除了第一行中所有控件
+
+        2.  重新向上述布局中添加新控件
+        '''
+        self.delete_formLayout_widget(self.dateEdit_formLayout)
+        self.delete_formLayout_widget(self.main_contract_formLayout)
+        self.delete_formLayout_widget(self.second_contract_formLayout)
+        # 删除之后,开始添加新的
+        # 1.添加日期
+        for time_name in self.option_type.get(option_type).get("time_type"):
+            label = self.create_label(time_name)
+            date_edit = self.create_dateEdit()
+            self.dateEdit_formLayout.addRow(label,date_edit)
+
+        # 2.主力合约添加价格
+        for price_name in self.option_type.get(option_type).get("price_type"):
+            label = self.create_label(price_name)
+            lineEdit = self.create_lineEdit()
+            self.main_contract_formLayout.addRow(label,lineEdit)
+        # 2.次主力
+        for price_name in self.option_type.get(option_type).get("price_type"):
+            label = self.create_label(price_name)
+            lineEdit = self.create_lineEdit()
+            self.second_contract_formLayout.addRow(label,lineEdit)
+
+        # for i in range(self.dateEdit_widget_verticalLayout.layout().count()):
+        #     x = self.dateEdit_widget_verticalLayout.layout().itemAt(i)
+        #     x = x.widget()
+        #     print(x)
+        #     print(x.currentText())
+        # print(self.main_contract_formLayout.rowCount())
+        # for i in range(self.main_contract_formLayout.rowCount()):
+        #     x = self.main_contract_formLayout.itemAt(i, QFormLayout.FieldRole)
+        #     x = x.widget()
+        #     print(x)
+
+    def on_option_table_info_signal(self, json):
+        '''收到主界面表格中所需要的信息'''
+        header = json['header']
+        table_data = json['table_data']
+        for table_name, data in table_data.items():
+            table_model_variable = self.tab_name_dict[table_name]
+            table_model_variable = getattr(self, table_model_variable)
+            table_model_variable.update_table(header, data)
 
     def on_update_password_success_signal(self, json):
         self.reset_secret_dialog_control.update_password_success_signal.emit(json)
@@ -135,7 +240,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         chat_msg_model = ChatMessageModel.from_json(self, json)
         chat_msg_model.show_message()
-
+        del chat_msg_model
     def on_chat_success_signal(self, json):
         '''发送文本成功,服务器做出了相应'''
 
@@ -164,19 +269,6 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
                                                  self.client_type)
             logger.info("ChatReqMsgModel" + str(chat_req_msg_model))
             to_who = ",".join([item.text() for item in hedge_list + transaction_list])
-            # self.show_msg_textBrowser.insertHtml(
-            #     f'''<div style="margin:20px 10px;">
-            #             <div style="width:10%; text-align:left; background-color:white;
-            #             border-radius:10%; color:gray;"> {self.get_time()}</div>
-            #             <div>
-            #                 <div> 我 对 {to_who}</div> &nbsp;&nbsp;&nbsp;
-            #                 <div >{chat_req_msg_model.message}</div>
-            #             </div>
-            #         </div>
-            #         <br>
-            #         <div></div>
-            #         '''
-            # )
             self.html_list.append(f'''
                     <div style="margin:20px 10px;">
                         <div style="width:10%; text-align:center; margin:0 auto; background-color:white;
@@ -189,7 +281,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
                 ''')
             self.show_msg_textBrowser.setHtml("".join(self.html_list))
             self.send_to_signing_server(chat_req_msg_model.get_json())
-
+            del chat_req_msg_model
         self.input_msg_textEdit.clear()
 
     def get_time(self):
@@ -204,7 +296,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_sell_new_option_action_triggered(self):
         '''点击销售新期权,页面跳转'''
-        print("销售")
+
         self.stackedWidget.setCurrentWidget(self.open_check_feasibility_page)
 
     @pyqtSlot()
@@ -370,7 +462,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         enquiry_feasibility_request_model = EnquiryFeasibilityRequestModel(self, "询价", "开仓")
         print("期权请求数据包内容-->", json.loads(enquiry_feasibility_request_model.get_json()))
-
+        del enquiry_feasibility_request_model
     def on_test_signal(self):
 
         self.loginDialog.show()
@@ -383,86 +475,78 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         '''点击取消按钮，回到控制页面，如果正在询价，也应该断开盯市询价。目前只是简单的回到控制页面'''
         self.stackedWidget.setCurrentWidget(self.control_module_page)
 
-    def _change_control_module_page(self, option_info_obj):
+    def _change_control_module_page(self, row_data):
         '''利用表格中某行数据来修改control_module_page(控制模块)的内容'''
 
+        self.transaction_number_label.setText(str(row_data[0]))
+        self.option_type_label.setText(str(row_data[1]))
+        self.customer_name_label.setText(str(row_data[2]))
+        self.contract_code_label.setText(str(row_data[3]))
+        self.lots_label.setText(str(row_data[4]))
+        self.number_per_hand_label.setText(str(row_data[5]))
+        self.unit_price_label.setText(str(row_data[6]))
+        self.total_price_label.setText(str(row_data[7]))
 
-        self.transaction_number_label.setText(str(option_info_obj.transaction_number))
-        self.customer_name_label.setText(str(option_info_obj.customer_name))
-        self.contract_code_label.setText(str(option_info_obj.contract_code))
-        self.option_type_label.setText(str(option_info_obj.option_type))
-        self.state_label.setText(str(option_info_obj.state))
-        self.total_price_label.setText(str(option_info_obj.total_price))
-        self.lots_label.setText(str(option_info_obj.lots))
-        self.number_per_hand_label.setText(str(option_info_obj.number_per_hand))
-        self.unit_price_label.setText(str(option_info_obj.unit_price))
-        self.main_strike_price_label.setText(str(option_info_obj.main_strike_price))
-        self.main_exercise_date_label.setText(str(option_info_obj.main_exercise_date))
-        self.second_strike_price_label.setText(str(option_info_obj.second_strike_price))
-        self.second_exercise_date_label.setText(str(option_info_obj.second_exercise_date))
+        self.main_strike_price_label.setText(str(row_data[8]))
+        self.main_exercise_date_label.setText(self.time_stamp_to_str(row_data[10]))
+        second_strike_price = ",".join([str(x) for x in row_data[11]])
+        self.second_strike_price_label.setText(second_strike_price)
+        second_exercise_date = ",".join([self.time_stamp_to_str(x) for x in row_data[12]])
+        self.second_exercise_date_label.setText(str(second_exercise_date))
 
+    def time_stamp_to_str(self, time_stamp, format_str='%Y/%m/%d'):
+        '''时间戳转化结构化的时间字符串  ---> 2018/12/12'''
+        time_now = time.strftime(format_str, time.localtime(time_stamp))
+        return time_now
 
+    @pyqtSlot(QModelIndex)
+    def on_on_way_for_guest_tableView_clicked(self, QModelIndex):
+        '''点击表格某一行,修改界面中lable内容'''
+        self.state_label.setText("对客在途")
+        row = QModelIndex.row()
+        row_data = self.on_way_for_guest_tableView_model.get_row_data(row)
+        print(row_data)
+        self._change_control_module_page(row_data)
 
-    @pyqtSlot(int, int)
-    def on_on_way_for_guest_tableWidget_cellClicked(self, row, column):
-        '''点击表格某一行,修改'''
-        option_info_obj = self.on_way_for_guest_tableWidget.option_info_obj_list[row]
-        if option_info_obj is self.old_option_info_obj:
-            return
-        else:
-            self._change_control_module_page(option_info_obj)
-            self.old_option_info_obj = option_info_obj
-            # logger.info(option_info_obj)
+    @pyqtSlot(QModelIndex)
+    def on_on_way_for_company_tableView_clicked(self, QModelIndex):
+        self.state_label.setText("对公在途")
+        row = QModelIndex.row()
+        row_data = self.on_way_for_guest_tableView_model.get_row_data(row)
+        print(row_data)
+        self._change_control_module_page(row_data)
 
-    @pyqtSlot(int, int)
-    def on_on_way_for_company_tableWidget_cellClicked(self, row, column):
-        option_info_obj = self.on_way_for_company_tableWidget.option_info_obj_list[row]
-        if option_info_obj is self.old_option_info_obj:
-            return
-        else:
-            self._change_control_module_page(option_info_obj)
-            self.old_option_info_obj = option_info_obj
-            # logger.info(option_info_obj)
+    @pyqtSlot(QModelIndex)
+    def on_today_close_for_guest_tableView_clicked(self, QModelIndex):
+        self.state_label.setText("对客今止")
+        row = QModelIndex.row()
+        row_data = self.on_way_for_guest_tableView_model.get_row_data(row)
+        print(row_data)
+        self._change_control_module_page(row_data)
 
-    @pyqtSlot(int, int)
-    def on_today_close_for_guest_tableWidget_cellClicked(self, row, column):
-        option_info_obj = self.today_close_for_guest_tableWidget.option_info_obj_list[row]
-        if option_info_obj is self.old_option_info_obj:
-            return
-        else:
-            self._change_control_module_page(option_info_obj)
-            self.old_option_info_obj = option_info_obj
-            # logger.info(option_info_obj)
+    @pyqtSlot(QModelIndex)
+    def on_today_close_for_company_tableView_clicked(self, QModelIndex):
+        self.state_label.setText("对公今止")
+        row = QModelIndex.row()
+        row_data = self.on_way_for_guest_tableView_model.get_row_data(row)
+        print(row_data)
+        self._change_control_module_page(row_data)
 
-    @pyqtSlot(int, int)
-    def on_today_close_for_company_tableWidget_cellClicked(self, row, column):
-        option_info_obj = self.today_close_for_guest_tableWidget.option_info_obj_list[row]
-        if option_info_obj is self.old_option_info_obj:
-            return
-        else:
-            self._change_control_module_page(option_info_obj)
-            self.old_option_info_obj = option_info_obj
-            # logger.info(option_info_obj)
+    @pyqtSlot(QModelIndex)
+    def on_today_open_for_guest_tableView_clicked(self, QModelIndex):
+        self.state_label.setText("对客今开")
+        row = QModelIndex.row()
+        row_data = self.on_way_for_guest_tableView_model.get_row_data(row)
+        print(row_data)
+        self._change_control_module_page(row_data)
 
-    @pyqtSlot(int, int)
-    def on_today_open_for_guest_tableWidget_cellClicked(self, row, column):
-        option_info_obj = self.today_open_for_guest_tableWidget.option_info_obj_list[row]
-        if option_info_obj is self.old_option_info_obj:
-            return
-        else:
-            self._change_control_module_page(option_info_obj)
-            self.old_option_info_obj = option_info_obj
-            # logger.info(option_info_obj)
-
-    @pyqtSlot(int, int)
-    def on_today_open_for_company_tableWidget_cellClicked(self, row, column):
-        option_info_obj = self.today_open_for_company_tableWidget.option_info_obj_list[row]
-        if option_info_obj is self.old_option_info_obj:
-            return
-        else:
-            self._change_control_module_page(option_info_obj)
-            self.old_option_info_obj = option_info_obj
-            # logger.info(option_info_obj)
+    @pyqtSlot(QModelIndex)
+    def on_today_open_for_company_tableView_clicked(self, QModelIndex):
+        self.state_label.setText("对公今开")
+        row = QModelIndex.row()
+        row_data = self.on_way_for_guest_tableView_model.get_row_data(row)
+        print(row_data)
+        self._change_control_module_page(row_data)
 
 
 class App(QApplication):
@@ -473,7 +557,7 @@ class App(QApplication):
 
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
-        # self.gui.show()
+        self.gui.show()
 
         loop.run_forever()
 

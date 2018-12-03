@@ -48,9 +48,9 @@ class LoginDialogControl(QDialog, Ui_LoginDialog):
         self.login_success_signal.connect(self.on_login_success_signal)
         self.login_failed_signal.connect(self.on_login_failed_signal)
         self.setupUi(self)
-        self.MainForm = MainFormControl(self.loop)
-        self.data_interaction_signing_server = DataInteraction(self.loop, self.MainForm, self)
-        self.MainForm.data_interaction_signing_server = self.data_interaction_signing_server
+        self.MainFormControl = MainFormControl(self.loop)
+        self.data_interaction_signing_server = DataInteraction(self.loop, self.MainFormControl, self)
+        self.MainFormControl.data_interaction_signing_server = self.data_interaction_signing_server
 
     def login_to_signing_server(self, url, port, login_request_json):
         '''登录到到签约服务器'''
@@ -145,13 +145,13 @@ class LoginDialogControl(QDialog, Ui_LoginDialog):
         '''
         # self.setVisible(False)  # 隐藏登录界面
         self.close()
-
-        LoginSuccessModel.from_json(self.MainForm, json)  #
+        login_success_model = LoginSuccessModel.from_json(self.MainFormControl, json)  #
+        login_success_model.change_type_option_combox(self.MainFormControl.option_type_comboBox)
         # print(self.userid)
         # print(self.main_lineEdit_dict)
         # print(self.second_lineEdit_dict)
         # print(self.dateEdit_dict)
-        self.MainForm.show()  # 打开主界面
+        self.MainFormControl.show()  # 打开主界面
 
 
 class LoginApp(QApplication):
