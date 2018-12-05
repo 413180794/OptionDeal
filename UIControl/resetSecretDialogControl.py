@@ -9,7 +9,7 @@ import json
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
-from UIModel.resetSecretModel import ResetSecretModel
+from UIControl.tool import get_password_md5
 from UIView.resetSecretDialog import Ui_resetSecretDialog
 
 
@@ -17,13 +17,14 @@ class ResetSecretDialogControl(QDialog, Ui_resetSecretDialog):
     update_password_failed_signal = pyqtSignal(dict)
     update_password_success_signal = pyqtSignal(dict)
 
-    def __init__(self, mainFormControl):
-        super(ResetSecretDialogControl, self).__init__()
+    def __init__(self, client_type,user_name,send_to_server,parent):
+        super(ResetSecretDialogControl, self).__init__(parent)
         self.setupUi(self)
-        self.mainFormControl = mainFormControl
-        self.client_type = self.mainFormControl.client_type
-        self.user_name = self.mainFormControl.user_name
+
+        self.client_type =client_type
+        self.user_name = user_name
         self.userid = self.user_name + "_" + self.client_type
+        self.send_to_server = send_to_server
         self.update_password_failed_signal.connect(self.on_update_password_failed_signal)
         self.update_password_success_signal.connect(self.on_update_password_success_signal)
 
@@ -36,10 +37,20 @@ class ResetSecretDialogControl(QDialog, Ui_resetSecretDialog):
 
     @pyqtSlot()
     def on_submit_pushButton_clicked(self):
-        reset_secret_model = ResetSecretModel(self)
-        if reset_secret_model.check():
-            # 检查确认密码与新密码是否相同
-            self.mainFormControl.send_to_signing_server(reset_secret_model.get_json())
+        old_password = self.old_password_LineEdit.text()
+        new_password = self.new_password_again_LineEdit.text()
+        new_password_again = self.new_password_again_LineEdit.text()
+        if new_password != new_password_again:
+            # 如果两次输入的密码不同
+            QMessageBox.critical(self, "错误!", "两次输入密码不相同!")
+            return
         else:
-            QMessageBox.critical(self, "错误!",
-                                 self.tr("两次输入密码不相同!"))
+            msg_json = json.dumps({
+            "purpose": "update_user_password",
+            "client_type": self.client_type,
+            "user_name": self.user_name,
+            "old_password": get_password_md5(old_password),
+            "new_password": get_password_md5(new_password),
+            "userid": self.userid
+        })
+            self.send_to_server(msg_json)

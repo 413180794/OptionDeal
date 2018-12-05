@@ -62,7 +62,7 @@ login_success = json.dumps({
     "company_name":"南华",
     "option_type":{
         "认抛止盈":{
-            "price_type":["行权价","向下止盈","向下止盈","向下止盈","向下止盈","向下止盈","向下止盈","向下止盈"],
+            "price_type":["行权价","向下止盈","向下止盈","向下止盈","向下止盈"],
             "time_type":["可行权前一日","可行权后一日"]
         },
         "认购止盈":{
@@ -110,7 +110,7 @@ async def hello(websocket, path):
             await websocket.send(opt_ess_info)
         elif x['purpose'] == "login_request":
             await websocket.send(login_success)
-            # await websocket.send(update_online_users)
+            await websocket.send(update_online_users)
             await websocket.send(option_table_info)
 
 async def hello2(websocket, path):

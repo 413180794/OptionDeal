@@ -1,5 +1,6 @@
 import collections
 import json
+import os
 import pathlib
 import ssl
 import sys
@@ -9,30 +10,29 @@ import time
 import websockets
 from PyQt5 import QtGui, QtCore, QtWidgets, sip
 from quamash import QEventLoop
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex, QStringListModel, Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp, QListView, QFormLayout
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex, QStringListModel, Qt, QSettings
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp, QListView, QFormLayout, \
+    QListWidgetItem, QToolButton, QVBoxLayout
 
+from UIControl.dataInteraction import DataInteraction
+from UIControl.loginDialogControl import LoginDialogControl
 from UIControl.resetSecretDialogControl import ResetSecretDialogControl
 from UIControl.setTempSecretDialogControl import SetTempSecretDialogControl
-from UIModel.chatMessageModel import ChatMessageModel
-from UIModel.chatReqMsgModel import ChatReqMsgModel
+from UIControl.tool import findSubStr, insert
+
 from UIModel.enquiryFeasibilityRequestModel import EnquiryFeasibilityRequestModel
 
 from UIModel.optionEssentialInfoModel import OptionEssentialInfoModel
 
-from UIModel.requestEssentialInfoModel import RequestEssentialInfoModel
 from UIModel.tableModel import TableModel
-from UIModel.updateUsersInfoModel import UpdateUsersInfoModel
 from UIView.mainWindow import Ui_MainWindow
 import asyncio
 import uvloop
 
-from learnMVC.richtextlinedit import MyDelegate
-
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
-handler = logging.FileHandler("main_log.txt")
+handler = logging.FileHandler("../log/main_log.txt")
 handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
@@ -63,14 +63,22 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     set_temp_password_failed_signal = pyqtSignal(dict)
     set_temp_password_success_signal = pyqtSignal(dict)
     option_table_info_signal = pyqtSignal(dict)
+    login_success_signal = pyqtSignal(dict)  # 登录成功信号
+    login_failed_signal = pyqtSignal(dict)  # 登录失败信号
+    login_pushButton_setDisabled_signal = pyqtSignal(bool)
+    set_loginDialog_text_signal = pyqtSignal(str)
 
     def __init__(self, loop):
         super(MainFormControl, self).__init__()
         self.setupUi(self)
         self.loop = loop
-        self.data_interaction_signing_server = None
+        self.client_type="Hedge"
+        self.data_interaction_signing_server = DataInteraction(self.loop,self)
         self.reset_secret_dialog_control = None
         self.set_temp_secret_dialog_control = None
+        self.login_dialog_control = LoginDialogControl(self.client_type,self.login_to_signing_server,self)
+        self.data_interaction_signing_server = DataInteraction(self.loop,self)
+        self.login_dialog_control.show()
         self.on_way_for_company_tableView_model = TableModel(
             ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
         self.on_way_for_guest_tableView_model = TableModel(
@@ -93,7 +101,28 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         # 以上的为None的变量在登录成功后才会被初始化
 
+
         # test#
+
+        self.handle = self.splitter.handle(1)
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.button = QToolButton(self.handle)
+        self.button.setArrowType(QtCore.Qt.RightArrow)
+        self.button.clicked.connect(
+            lambda: self.handleSplitterButton(False))
+        self.layout.addWidget(self.button)
+        self.handle.setLayout(self.layout)
+
+        self.handle_2 = self.splitter_2.handle(1)
+        self.layout_2 = QVBoxLayout()
+        self.layout_2.setContentsMargins(0, 0, 0, 0)
+        self.button_2 = QToolButton(self.handle_2)
+        self.button_2.setArrowType(QtCore.Qt.RightArrow)
+        self.button_2.clicked.connect(
+            lambda: self.handleSplitterButton_2(False))
+        self.layout_2.addWidget(self.button_2)
+        self.handle_2.setLayout(self.layout_2)
         # test#
         # signal
         self.testSigal.connect(self.on_test_signal)
@@ -101,14 +130,16 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.chat_message_to_groups_signal.connect(self.on_chat_message_to_groups_signal)
         self.opt_ess_info_signal.connect(self.on_opt_ess_info_signal)
         self.chat_success_signal.connect(self.on_chat_success_signal)
-        # self.hedge_listWidget.itemClicked.connect(self.on_hedge_listWidget_itemClicked)
-        # self.transaction_listWidget.itemClicked.connect(self.on_transaction_listWidget_itemClicked)
+
         self.update_password_failed_signal.connect(self.on_update_password_failed_signal)
         self.update_password_success_signal.connect(self.on_update_password_success_signal)
         self.option_table_info_signal.connect(self.on_option_table_info_signal)
-        # self.set_temp_password_failed_signal.connect(self.on_set_temp_password_failed_signal)
-        # self.set_temp_password_success_signal.conect(self.on_set_temp_password_success_signal)
-
+        self.set_temp_password_failed_signal.connect(self.on_set_temp_password_failed_signal)
+        self.set_temp_password_success_signal.connect(self.on_set_temp_password_success_signal)
+        self.login_success_signal.connect(self.on_login_success_signal)
+        self.login_failed_signal.connect(self.on_login_failed_signal)
+        self.login_pushButton_setDisabled_signal.connect(self.on_login_pushButton_setDisabled_signal)
+        self.set_loginDialog_text_signal.connect(self.on_set_loginDialog_text_signal)
         # self.lots_lineEdit_in_complement_infomation_page.textChange(self.on_lots_lineEdit_in_complement_infomation_page_textChange)
         # 注意这个六个赋值，原来QTableWidget是没有option_info_obj_list的，这是我强行添加的属性，用于保存每一条信息对象
         # 在on_on_way_for_guest_tableWidget_cellClicked 函数中可以体现出它的好处，方便的取到每一条表格中的数据对象
@@ -130,26 +161,101 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             self.second_max_lots_name_label,
             self.second_max_lots_label,
         ]  # 次主力合约的所有控件
-        #
-
         self.transaction_users = collections.defaultdict(list)  # 保存所有交易端的用户 键值类型为   公司名:[用户1,用户2,用户3]
         self.hedge_users = collections.defaultdict(list)
 
         # self.test()
 
         self.html_list = []
-        # self.loop.create_task(self.connect_test())
 
-        # self.on_way_for_guest_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+    def handleSplitterButton(self, left=True):
+        if left:
+            self.splitter.setSizes([4, 1])
+            self.button.setArrowType(QtCore.Qt.RightArrow)
+            self.button.clicked.disconnect()
+            self.button.clicked.connect(
+                lambda: self.handleSplitterButton(False))
+        else:
+            self.splitter.setSizes([1, 0])
+            self.button.setArrowType(QtCore.Qt.LeftArrow)
+            self.button.clicked.disconnect()
+            self.button.clicked.connect(
+                lambda: self.handleSplitterButton(True))
 
-        # async def connect_test(self):
-        #     self.websocket = await websockets.connect("wss://192.168.0.112:8888/traecho")
+    def handleSplitterButton_2(self, left=True):
+        if left:
+            self.splitter_2.setSizes([4, 1])
+            self.button_2.setArrowType(QtCore.Qt.RightArrow)
+            self.button_2.clicked.disconnect()
+            self.button_2.clicked.connect(
+                lambda: self.handleSplitterButton_2(False))
+        else:
+            self.splitter_2.setSizes([1, 0])
+            self.button_2.setArrowType(QtCore.Qt.LeftArrow)
+            self.button_2.clicked.disconnect()
+            self.button_2.clicked.connect(
+                lambda: self.handleSplitterButton_2(True))
+    @pyqtSlot(dict)
+    def on_login_failed_signal(self, json):
+        '''触发登录失败'''
+        # 在登录界面中显示失败的原因
+        self.login_dialog_control.lineedit_empty_Label.setText(json['failure_reason'])
+        self.data_interaction_signing_server.disconnect_to_server()
+        self.login_dialog_control.login_pushButton.setDisabled(False)
 
+    @pyqtSlot(dict)
+    def on_login_success_signal(self, json):
+        '''
+        触发登录成功,登录成功后,需要做出以下步骤:
+            1.关闭登录界面
+            2.由发送而来的json数据,构建登录成功模型
+                1.该模型对象自动完成动态构建控件
+                2.该模型对象自动将userid,lineEdit_dict,dateEdit_dict分配给主控制对象
+                    以下四条数据是成功登录以后签约服务器发送而来的, 代表的意思分别是:
+                    1.用户id,唯一标识
+                    2.主力合约中需要填写的价格,键为该价格中文含义,值为该价格输入框的变量名
+                    3.次主力合约中需要填写的价格,键为该价格中文含义,值为该价格输入框的变量名
+                    4.需要填写的日期,键为该日期的中文含义,值为该日期输入框的变量名
+                    self.userid = None
+                    self.main_lineEdit_dict = None
+                    self.second_lineEdit_dict = None
+                    self.dateEdit_dict = None
+        '''
+        self.user_name,self.client_type = json['userid'].split("_")
+        self.company_name = json['company_name']
+        self.login_dialog_control.close()
+        self.option_type = json['option_type']
+        self.change_type_option_combox(self.option_type)
+        self.show()  # 打开主界面
+
+    def change_type_option_combox(self, option_type):
+        for item in option_type.keys():
+            self.option_type_comboBox.addItem(item)
+
+    @pyqtSlot(bool)
+    def on_login_pushButton_setDisabled_signal(self,state):
+        self.login_dialog_control.login_pushButton.setDisabled(state)
+
+    @pyqtSlot(str)
+    def on_set_loginDialog_text_signal(self,text):
+        self.login_dialog_control.lineedit_empty_Label.setText(text)
+
+    def login_to_signing_server(self, url, port, login_request_json):
+        '''登录到到签约服务器'''
+        # logger.info("登录到签约服务器-->" + str(self.if_connect_to_signing_server()))
+        # print(self.if_connect_to_signing_server())
+        index = findSubStr("/",url,3)
+        print(index)
+        if index != -1:
+            url = insert(url, ":"+port, index)
+        else:
+            url = url + ":" + port
+        print(url)
+        self.data_interaction_signing_server.connect_to_sever(url, login_request_json)
     def delete_formLayout_widget(self, formLayout):
         # formLayout中除了第一行中所有控件
         for i in range(1, formLayout.rowCount()):
             formLayout.removeRow(1)
-
 
     def create_label(self, name):
         '''在page中创建一个label'''
@@ -168,6 +274,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         dateEdit = QtWidgets.QDateEdit(self.complement_infomation_page)
 
         return dateEdit
+
     def create_lineEdit(self):
         lineEdit = QtWidgets.QLineEdit(self.complement_infomation_page)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -176,6 +283,18 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         sizePolicy.setHeightForWidth(lineEdit.sizePolicy().hasHeightForWidth())
         lineEdit.setSizePolicy(sizePolicy)
         return lineEdit
+
+    def create_spinBox(self):
+        spinBox = QtWidgets.QSpinBox(self.complement_infomation_page)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(spinBox.sizePolicy().hasHeightForWidth())
+        spinBox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        spinBox.setSizePolicy(sizePolicy)
+        spinBox.setRange(0,100000)
+        return spinBox
+
     @pyqtSlot(str)
     def on_option_type_comboBox_currentTextChanged(self, option_type):
         '''修改主界面
@@ -194,30 +313,22 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         for time_name in self.option_type.get(option_type).get("time_type"):
             label = self.create_label(time_name)
             date_edit = self.create_dateEdit()
-            self.dateEdit_formLayout.addRow(label,date_edit)
+            self.dateEdit_formLayout.addRow(label, date_edit)
 
         # 2.主力合约添加价格
         for price_name in self.option_type.get(option_type).get("price_type"):
             label = self.create_label(price_name)
-            lineEdit = self.create_lineEdit()
-            self.main_contract_formLayout.addRow(label,lineEdit)
+            lineEdit = self.create_spinBox()
+            self.main_contract_formLayout.addRow(label, lineEdit)
         # 2.次主力
         for price_name in self.option_type.get(option_type).get("price_type"):
             label = self.create_label(price_name)
-            lineEdit = self.create_lineEdit()
-            self.second_contract_formLayout.addRow(label,lineEdit)
+            lineEdit = self.create_spinBox()
+            self.second_contract_formLayout.addRow(label, lineEdit)
 
-        # for i in range(self.dateEdit_widget_verticalLayout.layout().count()):
-        #     x = self.dateEdit_widget_verticalLayout.layout().itemAt(i)
-        #     x = x.widget()
-        #     print(x)
-        #     print(x.currentText())
-        # print(self.main_contract_formLayout.rowCount())
-        # for i in range(self.main_contract_formLayout.rowCount()):
-        #     x = self.main_contract_formLayout.itemAt(i, QFormLayout.FieldRole)
-        #     x = x.widget()
-        #     print(x)
 
+
+    @pyqtSlot(dict)
     def on_option_table_info_signal(self, json):
         '''收到主界面表格中所需要的信息'''
         header = json['header']
@@ -227,29 +338,52 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             table_model_variable = getattr(self, table_model_variable)
             table_model_variable.update_table(header, data)
 
+    @pyqtSlot(dict)
+    def on_set_temp_password_failed_signal(self,json):
+        self.set_temp_secret_dialog_control.set_temp_password_failed_signal.emit(json)
+
+    @pyqtSlot(dict)
+    def on_set_temp_password_success_signal(self,json):
+        self.set_temp_secret_dialog_control.set_temp_password_success_signal.emit(json)
+    @pyqtSlot(dict)
     def on_update_password_success_signal(self, json):
         self.reset_secret_dialog_control.update_password_success_signal.emit(json)
 
+    @pyqtSlot(dict)
     def on_update_password_failed_signal(self, json):
         self.reset_secret_dialog_control.update_password_failed_signal.emit(json)
 
+    @pyqtSlot(dict)
     def on_chat_message_to_groups_signal(self, json):
         '''接收服务器发送而来的消息'''
         logger.info("接收数据")
         logger.info(str(json))
 
-        chat_msg_model = ChatMessageModel.from_json(self, json)
-        chat_msg_model.show_message()
-        del chat_msg_model
+        self.html_list.append(f'''
+                          <div style="margin:20px 10px;">
+                          <div style="width:10%; text-align:center; margin:0 auto; background-color:white;
+                                  border-radius:10%; color:gray;"> {time.strftime("%H:%M", time.localtime())}</div>
+                              <div >
+                                  <div style="margin-right:20px;"> {json['from_user']} 对 {self.company_name}</div>
+                                  <div style="float: right;">{json['message']}</div>
+                              </div>
+                          </div>
+                             ''')
+        self.show_msg_textBrowser.setHtml("".join(self.html_list))
+
+    @pyqtSlot(dict)
     def on_chat_success_signal(self, json):
         '''发送文本成功,服务器做出了相应'''
 
+    @pyqtSlot(QListWidgetItem)
     def on_transaction_listWidget_itemClicked(self, item):
+
         self.show_users_listWidget.clear()
         self.hedge_listWidget.setCurrentIndex(QModelIndex())
         for user_name in self.transaction_users[item.text()]:
             self.show_users_listWidget.addItem(user_name)
 
+    @pyqtSlot(QListWidgetItem)
     def on_hedge_listWidget_itemClicked(self, item):
         self.show_users_listWidget.clear()
         self.transaction_listWidget.setCurrentIndex(QModelIndex())
@@ -265,23 +399,28 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             group_list = [item.text() + "_" + "Hedge" for item in hedge_list] + [item.text() + "_" + "Transaction" for
                                                                                  item
                                                                                  in transaction_list]
-            chat_req_msg_model = ChatReqMsgModel(self.input_msg_textEdit, self.company_name, self.user_name, group_list,
-                                                 self.client_type)
-            logger.info("ChatReqMsgModel" + str(chat_req_msg_model))
+            message = self.input_msg_textEdit.document().toPlainText()
             to_who = ",".join([item.text() for item in hedge_list + transaction_list])
             self.html_list.append(f'''
                     <div style="margin:20px 10px;">
                         <div style="width:10%; text-align:center; margin:0 auto; background-color:white;
                             border-radius:10%; color:gray;"> {self.get_time()}</div>
                         <div>
-                            <div style="margin-right:20px;"> 我 对 {to_who}</div> &nbsp;&nbsp;&nbsp;
-                            <div style="float: right;">{chat_req_msg_model.message}</div>
+                            <div style="margin-right:20px;text-align:right"> 我 对 {to_who}</div> 
+                            <div style="text-align:right;">{message}</div>
                         </div>
                     </div>
                 ''')
             self.show_msg_textBrowser.setHtml("".join(self.html_list))
-            self.send_to_signing_server(chat_req_msg_model.get_json())
-            del chat_req_msg_model
+            chat_req_msg_json = json.dumps({
+                "purpose": "chat_message",
+                "user_name": self.user_name,
+                "group_list": group_list,
+                "company_name": self.company_name,
+                "userid": self.user_name + "_" + self.client_type,
+                "message": message
+            })
+            self.send_to_signing_server(chat_req_msg_json)
         self.input_msg_textEdit.clear()
 
     def get_time(self):
@@ -307,15 +446,17 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     def on_reset_password_action_triggered(self):
         '''点击更改密码,弹出更改密码对话框'''
         if not self.reset_secret_dialog_control:
-            self.reset_secret_dialog_control = ResetSecretDialogControl(self)
+            self.reset_secret_dialog_control = ResetSecretDialogControl(self.client_type,self.user_name,self.send_to_signing_server,self)
+
         self.reset_secret_dialog_control.show()
 
     @pyqtSlot()
     def on_set_temp_password_action_triggered(self):
         '''点击授权密码,弹出设置授权密码对话框'''
         if not self.set_temp_secret_dialog_control:
-            self.set_temp_secret_dialog_control = SetTempSecretDialogControl(self)
+            self.set_temp_secret_dialog_control = SetTempSecretDialogControl(self.client_type,self.user_name,self.send_to_signing_server,self)
         self.set_temp_secret_dialog_control.show()
+
 
     @pyqtSlot()
     def on_next_pushButton_in_open_check_feasibility_page_clicked(self):
@@ -323,8 +464,6 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             1.交易端构建请求期权信息数据包,将此数据包发送给签约服务器
             2.等待接收 期权基本信息数据包 等待接收数据不在这里,收到期权基本信息数据包,将会调用 on_opt_ess_info_signal函数
         '''
-        requestEssentialInfoModel = RequestEssentialInfoModel(self)
-        requestEssentialInfoModel.send_json_to_signing_server()  # 发送给签约服务器
 
     def on_opt_ess_info_signal(self, json):
         '''
@@ -354,23 +493,25 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         3.更新公司下的用户
 
         '''
-        print(json)
-        update_users_info_model = UpdateUsersInfoModel.from_json(self, json)
-        update_users_info_model.remove_all_item()
+        online_users = json.get("online_users")
+        self.hedge_listWidget.clear()
+        self.transaction_listWidget.clear()
         self.hedge_users.clear()
         self.transaction_users.clear()
-        online_users = update_users_info_model.online_users
         for user_company_group in online_users:
             user_name, company_name, group_type = user_company_group.split("_")
             if group_type == "Hedge":
                 self.hedge_users[company_name].append(user_name)
             elif group_type == "Transaction":
                 self.transaction_users[company_name].append(user_name)
-
             else:
                 logger.info(group_type + "is wrong")
                 raise ValueError()
-        update_users_info_model.add_all_item(self.hedge_users, self.transaction_users)
+
+        for company_name in self.hedge_users.keys():
+            self.hedge_listWidget.addItem(company_name)
+        for company_name in self.transaction_users.keys():
+            self.transaction_listWidget.addItem(company_name)
 
     def send_to_signing_server(self, json):
         '''向签约服务器发送数据'''
@@ -378,12 +519,13 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
     def if_connect_to_signing_server(self):
         '''判断是否连接到签约服务器'''
+        self.lots_spinBox_in_complement_infomation_page.valueChanged()
         return False if self.data_interaction_signing_server.web_socket is None else True
 
-    @pyqtSlot(str)
-    def on_lots_lineEdit_in_complement_infomation_page_textChanged(self, text):
+    @pyqtSlot(int)
+    def on_lots_spinBox_in_complement_infomation_page_valueChanged(self, value):
         '''这个输入应该只能输入数字'''
-        self.show_lots_lineEdit_label.setText(f"={text}份")
+        self.show_lots_lineEdit_label.setText(f"={str(value)}份")
 
     def test(self):
 
@@ -463,6 +605,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         enquiry_feasibility_request_model = EnquiryFeasibilityRequestModel(self, "询价", "开仓")
         print("期权请求数据包内容-->", json.loads(enquiry_feasibility_request_model.get_json()))
         del enquiry_feasibility_request_model
+
     def on_test_signal(self):
 
         self.loginDialog.show()
@@ -551,15 +694,25 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
 class App(QApplication):
     def __init__(self):
+
         QApplication.__init__(self, sys.argv)
         loop = QEventLoop(self)
         self.loop = loop
 
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
-        self.gui.show()
+        # self.gui.show()
+        exit_code = self.exec_()
+        if exit_code == 888:
+            self.restart_program()
+        else:
+            sys.exit()
 
         loop.run_forever()
+
+    def restart_program(self):
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
 
 
 if __name__ == '__main__':

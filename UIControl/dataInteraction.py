@@ -46,9 +46,8 @@ ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
 class DataInteraction:
-    def __init__(self, loop, mainFormControl, loginDialogControl):
+    def __init__(self, loop, mainFormControl):
         self.loop = loop
-        self.loginDialogControl = loginDialogControl
         self.mainFormControl = mainFormControl
         self.web_socket = None
         self.url = None
@@ -75,32 +74,32 @@ class DataInteraction:
 
         except ConnectionRefusedError as e:
             # 如果连接被拒绝登录界面应该做出响应
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("无法连接服务器")
+            self.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("无法连接服务器")
             logger.warning(e)
         except websockets.exceptions.InvalidURI as e:
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("无效的地址")
+            self.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("无效的地址")
             logger.warning(e)
         except socket.gaierror as e:
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("未知的名称或服务")
+            elf.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("未知的名称或服务")
         except ssl.SSLError as e:
             logger.warning(e)
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("错误的SSL证书")
+            elf.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("错误的SSL证书")
         except ValueError as e:
             logger.error(e)
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("端口号范围为0-65535")
+            elf.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("端口号范围为0-65535")
         except concurrent.futures._base.TimeoutError as e:
             logger.warning(e)
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接超时")
+            elf.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("连接超时")
         except ConnectionResetError as e:
             logger.warning(e)
-            self.loginDialogControl.login_pushButton.setDisabled(False)
-            self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接被对方重设")
+            self.mainFormControl.login_pushButton_setDisabled_signal.emit(False)
+            self.mainFormControl.set_loginDialog_text_signal.emit("连接被对方重设")
         else:
             # 连接上以后发送一个登录请求
             print(self.json)
@@ -111,15 +110,15 @@ class DataInteraction:
                     receive_data = await asyncio.wait_for(self.web_socket.recv(), timeout=10)
                     receive_data = json.loads(receive_data)
                     purpose = receive_data.get("purpose", None)
-                    getattr(self.loginDialogControl, purpose + "_signal").emit(receive_data)
+                    getattr(self.mainFormControl, purpose + "_signal").emit(receive_data)
                 except concurrent.futures._base.TimeoutError as e:
                     '''10秒后还没有收到数据'''
                     logger.info(e)
-                    self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("网络超时")
-                    self.loginDialogControl.login_pushButton.setDisabled(False)
+                    self.mainFormControl.login_pushButton_setDisabled_signal.emit("网络超时")
+                    self.mainFormControl.set_loginDialog_text_signal.setDisabled(False)
                 except websockets.exceptions.ConnectionClosed as e:
-                    self.loginDialogControl.change_loginDialog_lineedit_empty_label_text("连接已经断开")
-                    self.loginDialogControl.login_pushButton.setDisabled(False)
+                    elf.mainFormControl.login_pushButton_setDisabled_signal.emit("连接已经断开")
+                    self.mainFormControl.set_loginDialog_text_signal.setDisabled(False)
                 else:
                     await self._data_receive()  # 连接后开始等待数据
 

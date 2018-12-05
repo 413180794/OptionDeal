@@ -1877,7 +1877,14 @@
                 <item row="0" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_12">
                   <item>
-                   <widget class="QLineEdit" name="lots_lineEdit_in_complement_infomation_page"/>
+                   <widget class="QSpinBox" name="lots_spinBox_in_complement_infomation_page">
+                    <property name="layoutDirection">
+                     <enum>Qt::LeftToRight</enum>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
                   </item>
                   <item>
                    <widget class="QLabel" name="show_lots_lineEdit_label">
@@ -2859,7 +2866,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QListView" name="transaction_listView">
+                  <widget class="QListWidget" name="transaction_listWidget">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
@@ -2901,7 +2908,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QListView" name="hedge_listView">
+                  <widget class="QListWidget" name="hedge_listWidget">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                      <horstretch>0</horstretch>
