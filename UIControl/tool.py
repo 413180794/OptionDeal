@@ -39,3 +39,10 @@ def findSubStr(substr, str, i):
 def insert(original, new, pos):
     '''Inserts new inside original at pos.'''
     return original[:pos] + new + original[pos:]
+
+
+if __name__ == '__main__':
+    x = str_to_time_stamp("2018/12/23 ")
+    print(x)
+    y = time_stamp_to_str(1545494400.0,"%Y-%m-%d %H:%M:%S")
+    print(y)

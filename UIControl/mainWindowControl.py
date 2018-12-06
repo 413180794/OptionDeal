@@ -10,11 +10,12 @@ import time
 import websockets
 from PyQt5 import QtGui, QtCore, QtWidgets, sip
 from quamash import QEventLoop
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex, QStringListModel, Qt, QSettings
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex, QStringListModel, Qt, QSettings, QFile, QTextStream
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp, QListView, QFormLayout, \
     QListWidgetItem, QToolButton, QVBoxLayout
 
 from UIControl.dataInteraction import DataInteraction
+from UIControl.fontAndColorDialogControl import FontAndColorDialogControl
 from UIControl.loginDialogControl import LoginDialogControl
 from UIControl.resetSecretDialogControl import ResetSecretDialogControl
 from UIControl.setTempSecretDialogControl import SetTempSecretDialogControl
@@ -72,12 +73,13 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         super(MainFormControl, self).__init__()
         self.setupUi(self)
         self.loop = loop
-        self.client_type="Hedge"
-        self.data_interaction_signing_server = DataInteraction(self.loop,self)
+        self.client_type = "Hedge"
+        self.data_interaction_signing_server = DataInteraction(self.loop, self)
         self.reset_secret_dialog_control = None
         self.set_temp_secret_dialog_control = None
-        self.login_dialog_control = LoginDialogControl(self.client_type,self.login_to_signing_server,self)
-        self.data_interaction_signing_server = DataInteraction(self.loop,self)
+        self.set_font_and_color_control = None
+        self.login_dialog_control = LoginDialogControl(self.client_type, self.login_to_signing_server, self)
+        self.data_interaction_signing_server = DataInteraction(self.loop, self)
         self.login_dialog_control.show()
         self.on_way_for_company_tableView_model = TableModel(
             ["交易书编号", "客户名称", "期货合约代码", "手数", "销售单价", "销售总价", "系统单号", "主行权价", "主行权日", "辅行权价", "辅行权日"], [])
@@ -101,9 +103,6 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
 
         # 以上的为None的变量在登录成功后才会被初始化
 
-
-        # test#
-
         self.handle = self.splitter.handle(1)
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -115,6 +114,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.handle.setLayout(self.layout)
 
         self.handle_2 = self.splitter_2.handle(1)
+        self.splitter_2.setSizes([1,0])
         self.layout_2 = QVBoxLayout()
         self.layout_2.setContentsMargins(0, 0, 0, 0)
         self.button_2 = QToolButton(self.handle_2)
@@ -124,7 +124,20 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.layout_2.addWidget(self.button_2)
         self.handle_2.setLayout(self.layout_2)
         # test#
+        # self.main_unit_price_label.setObjectName("warnLabel")
+        # self.main_total_price_label.setObjectName("warnLabel")
+
+        # test#
         # signal
+
+        '--初始化标签属性名,用于配置样式---'
+        '------警示标签'
+        self.main_unit_price_label.setProperty("name", 'warnLabel')
+        self.main_total_price_label.setProperty('name', 'warnLabel')
+        self.second_unit_price_label.setProperty("name","warnLabel")
+        self.second_total_price_label.setProperty("name","warnLabel")
+        '-------------'
+        '------------------------------'
         self.testSigal.connect(self.on_test_signal)
         self.users_info_update_signal.connect(self.on_users_info_update_signal)
         self.chat_message_to_groups_signal.connect(self.on_chat_message_to_groups_signal)
@@ -195,6 +208,13 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             self.button_2.clicked.disconnect()
             self.button_2.clicked.connect(
                 lambda: self.handleSplitterButton_2(True))
+    @pyqtSlot()
+    def on_font_color_action_triggered(self):
+        if not self.set_font_and_color_control:
+            self.set_font_and_color_control = FontAndColorDialogControl(self.reset_ui,self)
+        self.set_font_and_color_control.show()
+
+
     @pyqtSlot(dict)
     def on_login_failed_signal(self, json):
         '''触发登录失败'''
@@ -221,7 +241,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
                     self.second_lineEdit_dict = None
                     self.dateEdit_dict = None
         '''
-        self.user_name,self.client_type = json['userid'].split("_")
+        self.user_name, self.client_type = json['userid'].split("_")
         self.company_name = json['company_name']
         self.login_dialog_control.close()
         self.option_type = json['option_type']
@@ -233,25 +253,26 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             self.option_type_comboBox.addItem(item)
 
     @pyqtSlot(bool)
-    def on_login_pushButton_setDisabled_signal(self,state):
+    def on_login_pushButton_setDisabled_signal(self, state):
         self.login_dialog_control.login_pushButton.setDisabled(state)
 
     @pyqtSlot(str)
-    def on_set_loginDialog_text_signal(self,text):
+    def on_set_loginDialog_text_signal(self, text):
         self.login_dialog_control.lineedit_empty_Label.setText(text)
 
     def login_to_signing_server(self, url, port, login_request_json):
         '''登录到到签约服务器'''
         # logger.info("登录到签约服务器-->" + str(self.if_connect_to_signing_server()))
         # print(self.if_connect_to_signing_server())
-        index = findSubStr("/",url,3)
+        index = findSubStr("/", url, 3)
         print(index)
         if index != -1:
-            url = insert(url, ":"+port, index)
+            url = insert(url, ":" + port, index)
         else:
             url = url + ":" + port
         print(url)
         self.data_interaction_signing_server.connect_to_sever(url, login_request_json)
+
     def delete_formLayout_widget(self, formLayout):
         # formLayout中除了第一行中所有控件
         for i in range(1, formLayout.rowCount()):
@@ -292,7 +313,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         sizePolicy.setHeightForWidth(spinBox.sizePolicy().hasHeightForWidth())
         spinBox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         spinBox.setSizePolicy(sizePolicy)
-        spinBox.setRange(0,100000)
+        spinBox.setRange(0, 100000)
         return spinBox
 
     @pyqtSlot(str)
@@ -326,8 +347,6 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             lineEdit = self.create_spinBox()
             self.second_contract_formLayout.addRow(label, lineEdit)
 
-
-
     @pyqtSlot(dict)
     def on_option_table_info_signal(self, json):
         '''收到主界面表格中所需要的信息'''
@@ -339,12 +358,13 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             table_model_variable.update_table(header, data)
 
     @pyqtSlot(dict)
-    def on_set_temp_password_failed_signal(self,json):
+    def on_set_temp_password_failed_signal(self, json):
         self.set_temp_secret_dialog_control.set_temp_password_failed_signal.emit(json)
 
     @pyqtSlot(dict)
-    def on_set_temp_password_success_signal(self,json):
+    def on_set_temp_password_success_signal(self, json):
         self.set_temp_secret_dialog_control.set_temp_password_success_signal.emit(json)
+
     @pyqtSlot(dict)
     def on_update_password_success_signal(self, json):
         self.reset_secret_dialog_control.update_password_success_signal.emit(json)
@@ -446,7 +466,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     def on_reset_password_action_triggered(self):
         '''点击更改密码,弹出更改密码对话框'''
         if not self.reset_secret_dialog_control:
-            self.reset_secret_dialog_control = ResetSecretDialogControl(self.client_type,self.user_name,self.send_to_signing_server,self)
+            self.reset_secret_dialog_control = ResetSecretDialogControl(self.client_type, self.user_name,
+                                                                        self.send_to_signing_server, self)
 
         self.reset_secret_dialog_control.show()
 
@@ -454,9 +475,9 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     def on_set_temp_password_action_triggered(self):
         '''点击授权密码,弹出设置授权密码对话框'''
         if not self.set_temp_secret_dialog_control:
-            self.set_temp_secret_dialog_control = SetTempSecretDialogControl(self.client_type,self.user_name,self.send_to_signing_server,self)
+            self.set_temp_secret_dialog_control = SetTempSecretDialogControl(self.client_type, self.user_name,
+                                                                             self.send_to_signing_server, self)
         self.set_temp_secret_dialog_control.show()
-
 
     @pyqtSlot()
     def on_next_pushButton_in_open_check_feasibility_page_clicked(self):
@@ -691,7 +712,9 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         print(row_data)
         self._change_control_module_page(row_data)
 
-
+    def reset_ui(self):
+        stylesheet = getstylesheetfromQss("ui.qss")
+        self.setStyleSheet(stylesheet)
 class App(QApplication):
     def __init__(self):
 
@@ -701,7 +724,9 @@ class App(QApplication):
 
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
-        # self.gui.show()
+        self.gui.show()
+        stylesheet = getstylesheetfromQss('ui.qss')
+        self.gui.setStyleSheet(stylesheet)
         exit_code = self.exec_()
         if exit_code == 888:
             self.restart_program()
@@ -713,6 +738,14 @@ class App(QApplication):
     def restart_program(self):
         python = sys.executable
         os.execl(python, python, *sys.argv)
+
+def getstylesheetfromQss(qss_path):
+    file = QFile(qss_path)
+    file.open(QFile.ReadOnly)
+    ts = QTextStream(file)
+    stylesheet = ts.readAll()
+    return stylesheet
+
 
 
 if __name__ == '__main__':
