@@ -51,15 +51,12 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
             self.color_list[4] = self.warn_color
 
     def set_font(self, label, font):
+        print(font.key())
         label.setFont(font)
         label.setText(font.key())
 
     def set_color(self, label, color):
-        pa = QPalette()
-        pa.setColor(QPalette.Window, color)
-        label.setPalette(pa)
-        label.setAutoFillBackground(True)
-
+        label.setStyleSheet(f'''background:rgb({color.red()},{color.green()},{color.blue()})''')
     @pyqtSlot()
     def on_font_toolButton_clicked(self):
         '''点击字体设置键，触发设置字体功能'''
@@ -167,7 +164,7 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
     def on_confirm_change_pushButton_clicked(self):
 
         ui_qss = f'''QLabel{{
-    font-size:{self.font.pointSize()};
+    font-size:{self.font.pointSize()}pt;
     font-weight:{self.font.weight()};
     font-family:"{self.font.family()}";
     color:rgb({self.font_color.red()},{self.font_color.green()},{self.font_color.blue()});
@@ -180,12 +177,17 @@ QLabel[name="tableSheet"]{{
     background:;
     padding:2px;
 }}
-QLable[name="font_color"]{{
-    background:rgb({self.font_color.red()},{self.font_color.green()},{self.font_color.blue()})
-}}
+
 QTableView{{
     selection-background-color:rgb({self.selected_color.red()},{self.selected_color.green()},{self.selected_color.blue()});
-}}'''
+}}
+QMainWindow {{
+    background-color:rgb({self.background_color.red()},{self.background_color.green()},{self.background_color.blue()})  
+}}
+QDialog {{
+    background-color:rgb({self.background_color.red()},{self.background_color.green()},{self.background_color.blue()})  
+}}
+'''
         with open("ui.qss","w") as f:
             f.write(ui_qss)
         print(ui_qss)
