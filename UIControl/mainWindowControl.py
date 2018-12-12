@@ -215,6 +215,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.set_font_and_color_control.show()
 
 
+
     @pyqtSlot(dict)
     def on_login_failed_signal(self, json):
         '''触发登录失败'''
@@ -467,7 +468,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         '''点击更改密码,弹出更改密码对话框'''
         if not self.reset_secret_dialog_control:
             self.reset_secret_dialog_control = ResetSecretDialogControl(self.client_type, self.user_name,
-                                                                        self.send_to_signing_server, self)
+                                                                      self.send_to_signing_server, self)
 
         self.reset_secret_dialog_control.show()
 
@@ -725,7 +726,7 @@ class App(QApplication):
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
         self.gui.show()
-        stylesheet = getstylesheetfromQss('ui.qss')
+        stylesheet = getstylesheetfromQss('Dark/darkstyle.qss')
         self.gui.setStyleSheet(stylesheet)
         exit_code = self.exec_()
         if exit_code == 888:

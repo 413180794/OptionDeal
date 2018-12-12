@@ -122,9 +122,9 @@ async def hello2(websocket, path):
         await websocket.send("123")
 
 
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(
-    pathlib.Path(__file__).with_name('localhost.pem'))
+# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+# ssl_context.load_cert_chain(
+#     pathlib.Path(__file__).with_name('localhost.pem'))
 
 start_server = websockets.serve(
     hello, 'localhost', 8765)

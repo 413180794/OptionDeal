@@ -18,6 +18,7 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
         super(FontAndColorDialogControl, self).__init__(parent)
         self.setupUi(self)
         # 应该有默认字体
+        self.setWindowFlag(Qt.WindowStaysOnTopHint)
         self.color_list = [None] * 5
         self.settings = QSettings('color_font')
         self.font = self.settings.value("font")
@@ -64,6 +65,8 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
         print(font.family())
         print(font.weight())
         print(font.pointSize())
+        print(font)
+        print(ok)
         if ok:
             self.font = font
             self.show_font_label.setFont(font)
@@ -162,8 +165,13 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
 
     @pyqtSlot()
     def on_confirm_change_pushButton_clicked(self):
+        '''首先设置字体
+        字体:所有控件字体统一 QWidget
+        不同的背景颜色:
+            警示QLabel
 
-        ui_qss = f'''QLabel{{
+        '''
+        ui_qss = f'''QWidget{{
     font-size:{self.font.pointSize()}pt;
     font-weight:{self.font.weight()};
     font-family:"{self.font.family()}";
@@ -174,23 +182,31 @@ QLabel[name="warn_color"]{{
 }}
 QLabel[name="tableSheet"]{{
     border:1px solid #242424;
-    background:;
     padding:2px;
 }}
 
-QTableView{{
+QTableView,QListWidget{{
     selection-background-color:rgb({self.selected_color.red()},{self.selected_color.green()},{self.selected_color.blue()});
 }}
-QMainWindow {{
-    background-color:rgb({self.background_color.red()},{self.background_color.green()},{self.background_color.blue()})  
+QTableView,QListWidget,QTextBrowser{{
+     background-color:rgb({self.content_color.red()},{self.content_color.green()},{self.content_color.blue()})  
 }}
-QDialog {{
+QTextEdit{{
+    background: rgb({self.content_color.red()},{self.content_color.green()},{self.content_color.blue()})  
+}}
+QLineEdit{{
+    border:1px solid;
+    background: rgb({self.content_color.red()},{self.content_color.green()},{self.content_color.blue()});
+    selection-background-color:darkgray;  
+}}
+QMainWindow,QDialog,QPushButton,QHeaderView::section{{
     background-color:rgb({self.background_color.red()},{self.background_color.green()},{self.background_color.blue()})  
 }}
 '''
         with open("ui.qss","w") as f:
             f.write(ui_qss)
         print(ui_qss)
+
         self.reset_ui()
 
 
