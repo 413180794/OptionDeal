@@ -726,7 +726,7 @@ class App(QApplication):
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
         self.gui.show()
-        stylesheet = getstylesheetfromQss('Dark/darkstyle.qss')
+        stylesheet = getstylesheetfromQss('darcula.qss')
         self.gui.setStyleSheet(stylesheet)
         exit_code = self.exec_()
         if exit_code == 888:

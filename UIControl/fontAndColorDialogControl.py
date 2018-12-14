@@ -66,6 +66,7 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
         print(font.weight())
         print(font.pointSize())
         print(font)
+        print(font.key())
         print(ok)
         if ok:
             self.font = font
