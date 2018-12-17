@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>shortCutDialog</class>
+ <widget class="QDialog" name="shortCutDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>406</width>
-    <height>629</height>
+    <width>346</width>
+    <height>696</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,17 +16,59 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="14" column="0">
-      <widget class="QLabel" name="label_10">
+     <item row="6" column="1">
+      <widget class="QLabel" name="hide_detail_company_label">
        <property name="text">
-        <string>销售新期权</string>
+        <string/>
        </property>
       </widget>
      </item>
-     <item row="15" column="0">
-      <widget class="QLabel" name="label_9">
+     <item row="1" column="1">
+      <widget class="QLabel" name="move_right_label">
        <property name="text">
-        <string>本模块确认键</string>
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="1">
+      <widget class="QLabel" name="recove_price_label">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_30">
+       <property name="text">
+        <string>向上翻页</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_48">
+       <property name="text">
+        <string>向下翻页</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="1">
+      <widget class="QLabel" name="sell_new_option_label">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_29">
+       <property name="text">
+        <string>定位最上</string>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="1">
+      <widget class="QLabel" name="add_price_label">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -37,17 +79,128 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
-      <widget class="QLabel" name="label_28">
+     <item row="9" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_12">
+       <item>
+        <widget class="QLabel" name="location_up_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="location_up_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="5" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="show_hide_company_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="show_hide_company_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="10" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_13">
+       <item>
+        <widget class="QLabel" name="location_down_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="location_down_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="7" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <item>
+        <widget class="QLabel" name="page_down_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="page_down_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="16" column="0">
+      <widget class="QLabel" name="label_8">
        <property name="text">
-        <string>定位最下</string>
+        <string>溢价率+0.25%</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_13">
+     <item row="2" column="1">
+      <widget class="QLabel" name="switch_behind_label">
        <property name="text">
-        <string>显/隐对公</string>
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <item>
+        <widget class="QLabel" name="page_up_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="page_up_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>显/隐明细</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_49">
+       <property name="text">
+        <string>明细对公双隐</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="label_12">
+       <property name="text">
+        <string>定位最右</string>
        </property>
       </widget>
      </item>
@@ -55,13 +208,6 @@
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>页面向后切</string>
-       </property>
-      </widget>
-     </item>
-     <item row="16" column="0">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>溢价率+0.25%</string>
        </property>
       </widget>
      </item>
@@ -75,38 +221,88 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_49">
+     <item row="14" column="0">
+      <widget class="QLabel" name="label_10">
        <property name="text">
-        <string>明细对公双隐</string>
+        <string>销售新期权</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_30">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>向上翻页</string>
+        <string>&lt;&gt;向右平移</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="label_50">
+     <item row="12" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <item>
+        <widget class="QLabel" name="location_right_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="location_right_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_28">
        <property name="text">
-        <string>Alt+Tab</string>
+        <string>定位最下</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>显/隐明细</string>
-       </property>
-      </widget>
+     <item row="4" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="show_hide_detail_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="show_hide_detail_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="11" column="0">
       <widget class="QLabel" name="label_27">
        <property name="text">
         <string>定位最左</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_13">
+       <property name="text">
+        <string>显/隐对公</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>页面向前切</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>本模块确认键</string>
        </property>
       </widget>
      </item>
@@ -120,143 +316,45 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_29">
+     <item row="15" column="1">
+      <widget class="QLabel" name="this_module_confirm_label">
        <property name="text">
-        <string>定位最上</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>页面向前切</string>
-       </property>
-      </widget>
-     </item>
-     <item row="12" column="0">
-      <widget class="QLabel" name="label_12">
-       <property name="text">
-        <string>定位最右</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>按钮</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_48">
-       <property name="text">
-        <string>向下翻页</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="label_51">
-       <property name="text">
-        <string>Alt+↓</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLabel" name="label_52">
+      <widget class="QLabel" name="switch_front_label">
        <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLabel" name="label_53">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLabel" name="label_54">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QLabel" name="label_55">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QLabel" name="label_56">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QLabel" name="label_57">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
-      <widget class="QLabel" name="label_58">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="10" column="1">
-      <widget class="QLabel" name="label_59">
-       <property name="text">
-        <string>Alt+↑</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item row="11" column="1">
-      <widget class="QLabel" name="label_60">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <item>
+        <widget class="QLabel" name="location_left_label">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="location_left_toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
-     <item row="12" column="1">
-      <widget class="QLabel" name="label_61">
+     <item row="18" column="1">
+      <widget class="QPushButton" name="pushButton">
        <property name="text">
-        <string>Alt+↑</string>
+        <string>确认更改</string>
        </property>
-      </widget>
-     </item>
-     <item row="14" column="1">
-      <widget class="QLabel" name="label_62">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="1">
-      <widget class="QLabel" name="label_63">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="16" column="1">
-      <widget class="QLabel" name="label_64">
-       <property name="text">
-        <string>Alt+↑</string>
-       </property>
-      </widget>
-     </item>
-     <item row="17" column="1">
-      <widget class="QLabel" name="label_65">
-       <property name="text">
-        <string>Alt+↑</string>
+       <property name="shortcut">
+        <string>Ctrl+Return</string>
        </property>
       </widget>
      </item>
@@ -264,6 +362,33 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>show_hide_detail_toolButton</tabstop>
+  <tabstop>show_hide_company_toolButton</tabstop>
+  <tabstop>page_down_toolButton</tabstop>
+  <tabstop>page_up_toolButton</tabstop>
+  <tabstop>location_up_toolButton</tabstop>
+  <tabstop>location_down_toolButton</tabstop>
+  <tabstop>location_left_toolButton</tabstop>
+  <tabstop>location_right_toolButton</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>shortCutDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>656</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>609</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

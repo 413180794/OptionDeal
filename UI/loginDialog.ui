@@ -131,6 +131,9 @@
      <property name="text">
       <string>正常登录</string>
      </property>
+     <property name="shortcut">
+      <string>Ctrl+Return</string>
+     </property>
     </widget>
    </item>
    <item row="5" column="0" colspan="2">
@@ -163,6 +166,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>user_name_LineEdit</tabstop>
+  <tabstop>password_LineEdit</tabstop>
+  <tabstop>intranet_server_ip_LineEdit</tabstop>
+  <tabstop>intranet_server_port_LineEdit</tabstop>
+  <tabstop>local_proxy_server_port_LineEdit</tabstop>
+  <tabstop>login_pushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <slots>

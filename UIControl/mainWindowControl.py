@@ -9,16 +9,19 @@ import time
 
 import websockets
 from PyQt5 import QtGui, QtCore, QtWidgets, sip
+from PyQt5.QtGui import QKeySequence
 from quamash import QEventLoop
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QModelIndex, QStringListModel, Qt, QSettings, QFile, QTextStream
 from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel, QDialog, qApp, QListView, QFormLayout, \
-    QListWidgetItem, QToolButton, QVBoxLayout
+    QListWidgetItem, QToolButton, QVBoxLayout, QAction
 
+from UIControl.canTradeDialogControl import CanTradeDialogControl
 from UIControl.dataInteraction import DataInteraction
 from UIControl.fontAndColorDialogControl import FontAndColorDialogControl
 from UIControl.loginDialogControl import LoginDialogControl
 from UIControl.resetSecretDialogControl import ResetSecretDialogControl
 from UIControl.setTempSecretDialogControl import SetTempSecretDialogControl
+from UIControl.shortCutSetDialogControl import ShortCutSetDialogControl
 from UIControl.tool import findSubStr, insert
 
 from UIModel.enquiryFeasibilityRequestModel import EnquiryFeasibilityRequestModel
@@ -78,6 +81,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.reset_secret_dialog_control = None
         self.set_temp_secret_dialog_control = None
         self.set_font_and_color_control = None
+        self.short_cut_set_dialog_control = None
+        self.can_trade_option_dialog_control = None
         self.login_dialog_control = LoginDialogControl(self.client_type, self.login_to_signing_server, self)
         self.data_interaction_signing_server = DataInteraction(self.loop, self)
         self.login_dialog_control.show()
@@ -114,7 +119,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.handle.setLayout(self.layout)
 
         self.handle_2 = self.splitter_2.handle(1)
-        self.splitter_2.setSizes([1,0])
+        self.splitter_2.setSizes([1, 0])
         self.layout_2 = QVBoxLayout()
         self.layout_2.setContentsMargins(0, 0, 0, 0)
         self.button_2 = QToolButton(self.handle_2)
@@ -126,18 +131,9 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         # test#
         # self.main_unit_price_label.setObjectName("warnLabel")
         # self.main_total_price_label.setObjectName("warnLabel")
-
         # test#
         # signal
 
-        '--初始化标签属性名,用于配置样式---'
-        '------警示标签'
-        self.main_unit_price_label.setProperty("name", 'warnLabel')
-        self.main_total_price_label.setProperty('name', 'warnLabel')
-        self.second_unit_price_label.setProperty("name","warnLabel")
-        self.second_total_price_label.setProperty("name","warnLabel")
-        '-------------'
-        '------------------------------'
         self.testSigal.connect(self.on_test_signal)
         self.users_info_update_signal.connect(self.on_users_info_update_signal)
         self.chat_message_to_groups_signal.connect(self.on_chat_message_to_groups_signal)
@@ -156,12 +152,17 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         # self.lots_lineEdit_in_complement_infomation_page.textChange(self.on_lots_lineEdit_in_complement_infomation_page_textChange)
         # 注意这个六个赋值，原来QTableWidget是没有option_info_obj_list的，这是我强行添加的属性，用于保存每一条信息对象
         # 在on_on_way_for_guest_tableWidget_cellClicked 函数中可以体现出它的好处，方便的取到每一条表格中的数据对象
-        self.tab_name_dict = {"对客在途": "on_way_for_guest_tableView_model", "对公在途": "on_way_for_company_tableView_model",
+        self.tableModel_name_dict = {"对客在途": "on_way_for_guest_tableView_model", "对公在途": "on_way_for_company_tableView_model",
                               "对客今开": "today_open_for_guest_tableView_model",
                               "对公今开": "today_open_for_company_tableView_model",
                               "对客今止": "today_close_for_guest_tableView_model",
                               "对公今止": "today_close_for_company_tableView_model"}
-        self.old_option_info_obj = None  # 防止一直在点击同一行，一直在触发函数
+
+        self.tableView_name_dict = {"对客在途": "on_way_for_guest_tableView", "对公在途": "on_way_for_company_tableView",
+                              "对客今开": "today_open_for_guest_tableView",
+                              "对公今开": "today_open_for_company_tableView",
+                              "对客今止": "today_close_for_guest_tableView",
+                              "对公今止": "today_close_for_company_tableView"}
         self.second_contract_widget = [
             self.second_contract_code_name_label,
             self.second_contract_code_label,
@@ -176,11 +177,107 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         ]  # 次主力合约的所有控件
         self.transaction_users = collections.defaultdict(list)  # 保存所有交易端的用户 键值类型为   公司名:[用户1,用户2,用户3]
         self.hedge_users = collections.defaultdict(list)
+        self.shortcut_settings = QSettings("short_cut")
+        # 所有的自定义action 都应该登录时从QSetting配置
 
-        # self.test()
+        self.set_shortcut()
 
-        self.html_list = []
+    def set_shortcut(self):
+        '''配置快捷键'''
+        print("配置跨级接纳")
+        show_hide_detail_seq = QKeySequence(self.shortcut_settings.value("show_hide_detail"))
 
+        if show_hide_detail_seq:
+            self.show_hide_detail_action.setShortcut(show_hide_detail_seq)
+
+        show_hide_company_seq = QKeySequence(self.shortcut_settings.value("show_hide_company"))
+        if show_hide_company_seq:
+            self.show_hide_company_action.setShortcut(show_hide_company_seq)
+
+        page_down_seq = QKeySequence(self.shortcut_settings.value("page_down"))
+        if page_down_seq:
+            self.page_down_action.setShortcut(page_down_seq)
+
+        page_up_seq = QKeySequence(self.shortcut_settings.value("page_up"))
+        if page_up_seq:
+            self.page_up_action.setShortcut(page_up_seq)
+
+        location_up_seq = QKeySequence(self.shortcut_settings.value("location_up"))
+        if location_up_seq:
+            self.location_up_action.setShortcut(location_up_seq)
+
+        location_right_seq = QKeySequence(self.shortcut_settings.value("location_right"))
+        if location_right_seq:
+            self.location_right_action.setShortcut(location_right_seq)
+
+        location_left_seq = QKeySequence(self.shortcut_settings.value("location_left"))
+        if location_left_seq:
+            self.location_left_action.setShortcut(location_left_seq)
+
+        location_down_seq = QKeySequence(self.shortcut_settings.value("location_down"))
+        if location_down_seq:
+            self.location_down_action.setShortcut(location_down_seq)
+
+    @pyqtSlot()
+    def on_move_right_action_2_triggered(self):
+        '''触发向右平移'''
+        print("向右平移")
+        print(self.locale())
+        # self.move(self.x()-self.move_right_lengh,self.y())  # 更改窗口位置
+
+    @pyqtSlot()
+    def on_switch_behind_action_triggered(self):
+        '''触发向后切'''
+        print("向后切")
+
+    @pyqtSlot()
+    def on_switch_front_action_triggered(self):
+        "触发向前切"
+        print("向前切")
+    @pyqtSlot()
+    def on_show_hide_detail_action_triggered(self):
+        '''触发隐藏显示明细'''
+        print("隐藏显示明细平")
+    @pyqtSlot()
+    def on_show_hide_company_action_triggered(self):
+        '''触发隐藏对公'''
+        print("隐藏对公")
+    @pyqtSlot()
+    def on_hide_detail_company_action_triggered(self):
+        '''触发隐藏对公与明细'''
+        print("隐藏对公与明细")
+    @pyqtSlot()
+    def on_page_down_action_triggered(self):
+        '''触发向下翻页'''
+        print("向下翻页")
+    @pyqtSlot()
+    def on_page_up_action_triggered(self):
+        '''触发向上翻页'''
+        print("向上翻页")
+    @pyqtSlot()
+    def on_location_up_action_triggered(self):
+        '''触发定位最上'''
+        print("定位最上")
+    @pyqtSlot()
+    def on_location_down_action_triggered(self):
+        '''定位最下'''
+        print("定位最下")
+    @pyqtSlot()
+    def on_location_left_action_triggered(self):
+        '''定位最左'''
+        print("定位最左")
+    @pyqtSlot()
+    def on_location_right_action_triggered(self):
+        '''定位最右'''
+        print("定位最右")
+    @pyqtSlot()
+    def on_add_price_action_triggered(self):
+        '''增加溢价率'''
+        print("溢价率")
+    @pyqtSlot()
+    def on_recove_price_action_triggered(self):
+        '''恢复溢价率'''
+        print("恢复溢价率")
     def handleSplitterButton(self, left=True):
         if left:
             self.splitter.setSizes([4, 1])
@@ -208,13 +305,20 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             self.button_2.clicked.disconnect()
             self.button_2.clicked.connect(
                 lambda: self.handleSplitterButton_2(True))
+
     @pyqtSlot()
     def on_font_color_action_triggered(self):
         if not self.set_font_and_color_control:
-            self.set_font_and_color_control = FontAndColorDialogControl(self.reset_ui,self)
+            self.set_font_and_color_control = FontAndColorDialogControl(self.reset_ui, self)
         self.set_font_and_color_control.show()
 
-
+    @pyqtSlot()
+    def on_set_short_cut_action_triggered(self):
+        if not self.short_cut_set_dialog_control:
+            self.short_cut_set_dialog_control = ShortCutSetDialogControl(self)
+            self.short_cut_set_dialog_control.reset_shortcut_signal.connect(self.set_shortcut)
+        self.short_cut_set_dialog_control.set_seq()
+        self.short_cut_set_dialog_control.show()
 
     @pyqtSlot(dict)
     def on_login_failed_signal(self, json):
@@ -246,8 +350,17 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         self.company_name = json['company_name']
         self.login_dialog_control.close()
         self.option_type = json['option_type']
+        self.pre_rate = json['pre_rate'] # 溢价率 ---
+        self.can_trade_option = json['opt_info'] # 今日可销售期权
         self.change_type_option_combox(self.option_type)
         self.show()  # 打开主界面
+
+    @pyqtSlot()
+    def on_can_trade_option_action_triggered(self):
+        '''查看今日可销售期权'''
+        if not self.can_trade_option_dialog_control:
+            self.can_trade_option_dialog_control = CanTradeDialogControl(self,self.can_trade_option)
+        self.can_trade_option_dialog_control.show()
 
     def change_type_option_combox(self, option_type):
         for item in option_type.keys():
@@ -354,10 +467,12 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         header = json['header']
         table_data = json['table_data']
         for table_name, data in table_data.items():
-            table_model_variable = self.tab_name_dict[table_name]
+            table_model_variable = self.tableModel_name_dict[table_name]
             table_model_variable = getattr(self, table_model_variable)
             table_model_variable.update_table(header, data)
-
+            tableView_variable = self.tableView_name_dict[table_name]
+            tableView_variable = getattr(self,tableView_variable)
+            tableView_variable.setColumnHidden(len(header)-1,True)
     @pyqtSlot(dict)
     def on_set_temp_password_failed_signal(self, json):
         self.set_temp_secret_dialog_control.set_temp_password_failed_signal.emit(json)
@@ -468,7 +583,7 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
         '''点击更改密码,弹出更改密码对话框'''
         if not self.reset_secret_dialog_control:
             self.reset_secret_dialog_control = ResetSecretDialogControl(self.client_type, self.user_name,
-                                                                      self.send_to_signing_server, self)
+                                                                        self.send_to_signing_server, self)
 
         self.reset_secret_dialog_control.show()
 
@@ -486,6 +601,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
             1.交易端构建请求期权信息数据包,将此数据包发送给签约服务器
             2.等待接收 期权基本信息数据包 等待接收数据不在这里,收到期权基本信息数据包,将会调用 on_opt_ess_info_signal函数
         '''
+
+
 
     def on_opt_ess_info_signal(self, json):
         '''
@@ -716,6 +833,8 @@ class MainFormControl(QMainWindow, Ui_MainWindow):
     def reset_ui(self):
         stylesheet = getstylesheetfromQss("ui.qss")
         self.setStyleSheet(stylesheet)
+
+
 class App(QApplication):
     def __init__(self):
 
@@ -726,7 +845,7 @@ class App(QApplication):
         asyncio.set_event_loop(self.loop)
         self.gui = MainFormControl(self.loop)
         self.gui.show()
-        stylesheet = getstylesheetfromQss('darcula.qss')
+        stylesheet = getstylesheetfromQss('ui.qss')
         self.gui.setStyleSheet(stylesheet)
         exit_code = self.exec_()
         if exit_code == 888:
@@ -740,13 +859,13 @@ class App(QApplication):
         python = sys.executable
         os.execl(python, python, *sys.argv)
 
+
 def getstylesheetfromQss(qss_path):
     file = QFile(qss_path)
     file.open(QFile.ReadOnly)
     ts = QTextStream(file)
     stylesheet = ts.readAll()
     return stylesheet
-
 
 
 if __name__ == '__main__':

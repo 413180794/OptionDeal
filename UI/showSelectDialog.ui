@@ -108,6 +108,9 @@
        <property name="text">
         <string>确认更改</string>
        </property>
+       <property name="shortcut">
+        <string>Ctrl+Return</string>
+       </property>
       </widget>
      </item>
     </layout>

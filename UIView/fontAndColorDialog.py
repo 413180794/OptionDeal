@@ -188,4 +188,5 @@ class Ui_FontAndColorDialog(object):
         self.font_toolButton.setText(_translate("FontAndColorDialog", "..."))
         self.cancel_pushButton.setText(_translate("FontAndColorDialog", "取消"))
         self.confirm_change_pushButton.setText(_translate("FontAndColorDialog", "确认修改"))
+        self.confirm_change_pushButton.setShortcut(_translate("FontAndColorDialog", "Ctrl+Return"))
 

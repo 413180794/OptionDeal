@@ -7,14 +7,13 @@
 
 
 from PyQt5.QtCore import pyqtSlot, QSettings, Qt
-from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QDialog, QApplication, QFontDialog, QColorDialog, QMessageBox
 
 from UIView.fontAndColorDialog import Ui_FontAndColorDialog
 
 
 class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
-    def __init__(self,reset_ui,parent):
+    def __init__(self,reset_ui_callback,parent):
         super(FontAndColorDialogControl, self).__init__(parent)
         self.setupUi(self)
         # 应该有默认字体
@@ -22,7 +21,7 @@ class FontAndColorDialogControl(QDialog, Ui_FontAndColorDialog):
         self.color_list = [None] * 5
         self.settings = QSettings('color_font')
         self.font = self.settings.value("font")
-        self.reset_ui = reset_ui
+        self.reset_ui_callback = reset_ui_callback
         if self.font:
             self.set_font(self.show_font_label, self.font)
 
@@ -200,7 +199,7 @@ QLineEdit{{
     background: rgb({self.content_color.red()},{self.content_color.green()},{self.content_color.blue()});
     selection-background-color:darkgray;  
 }}
-QMainWindow,QDialog,QPushButton,QHeaderView::section{{
+QMainWindow,QDialog,QPushButton,QHeaderView::section,QMenuBar,QMenu{{
     background-color:rgb({self.background_color.red()},{self.background_color.green()},{self.background_color.blue()})  
 }}
 '''
@@ -208,7 +207,7 @@ QMainWindow,QDialog,QPushButton,QHeaderView::section{{
             f.write(ui_qss)
         print(ui_qss)
 
-        self.reset_ui()
+        self.reset_ui_callback()
 
 
 if __name__ == '__main__':

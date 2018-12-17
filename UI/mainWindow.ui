@@ -70,7 +70,7 @@
           <enum>QTabWidget::South</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="on_way_for_guest_tab">
           <attribute name="title">
@@ -81,6 +81,9 @@
             <widget class="QTableView" name="on_way_for_guest_tableView">
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
              </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
@@ -353,7 +356,7 @@
            <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="control_module_page">
            <property name="styleSheet">
@@ -2264,6 +2267,9 @@
                 <property name="text">
                  <string>确认开仓</string>
                 </property>
+                <property name="shortcut">
+                 <string>Ctrl+Return</string>
+                </property>
                </widget>
               </item>
               <item row="1" column="2" colspan="2">
@@ -3070,19 +3076,39 @@
      <string>开始</string>
     </property>
     <addaction name="action"/>
-    <addaction name="action_2"/>
+    <addaction name="can_trade_option_action"/>
     <addaction name="sell_new_option_action"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>选项</string>
     </property>
+    <widget class="QMenu" name="menu_5">
+     <property name="title">
+      <string>操作</string>
+     </property>
+     <addaction name="move_right_action_2"/>
+     <addaction name="switch_behind_action"/>
+     <addaction name="switch_front_action"/>
+     <addaction name="show_hide_detail_action"/>
+     <addaction name="show_hide_company_action"/>
+     <addaction name="hide_detail_company_action"/>
+     <addaction name="page_down_action"/>
+     <addaction name="page_up_action"/>
+     <addaction name="location_up_action"/>
+     <addaction name="location_down_action"/>
+     <addaction name="location_left_action"/>
+     <addaction name="location_right_action"/>
+     <addaction name="add_price_action"/>
+     <addaction name="recove_price_action"/>
+    </widget>
     <addaction name="reset_password_action"/>
     <addaction name="set_temp_password_action"/>
     <addaction name="action_5"/>
     <addaction name="font_color_action"/>
-    <addaction name="action_7"/>
-    <addaction name="action_8"/>
+    <addaction name="set_short_cut_action"/>
+    <addaction name="move_right_action_4"/>
+    <addaction name="menu_5"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -3093,7 +3119,7 @@
     <string>重连</string>
    </property>
   </action>
-  <action name="action_2">
+  <action name="can_trade_option_action">
    <property name="text">
     <string>查看可交易期货</string>
    </property>
@@ -3101,6 +3127,9 @@
   <action name="sell_new_option_action">
    <property name="text">
     <string>销售新期权</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Ins</string>
    </property>
   </action>
   <action name="reset_password_action">
@@ -3118,12 +3147,12 @@
     <string>字体及配色</string>
    </property>
   </action>
-  <action name="action_7">
+  <action name="set_short_cut_action">
    <property name="text">
     <string>快捷键设置</string>
    </property>
   </action>
-  <action name="action_8">
+  <action name="move_right_action_4">
    <property name="text">
     <string>关于软件</string>
    </property>
@@ -3131,6 +3160,174 @@
   <action name="set_temp_password_action">
    <property name="text">
     <string>授权密码</string>
+   </property>
+  </action>
+  <action name="move_right_action">
+   <property name="text">
+    <string>&lt;&gt;向右平移</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>页面向后切</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>页面向前切</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>显/隐明细</string>
+   </property>
+  </action>
+  <action name="action_9">
+   <property name="text">
+    <string>显/隐对公</string>
+   </property>
+  </action>
+  <action name="action_10">
+   <property name="text">
+    <string>明细对公双隐藏</string>
+   </property>
+  </action>
+  <action name="action_11">
+   <property name="text">
+    <string>向上翻页</string>
+   </property>
+  </action>
+  <action name="action_12">
+   <property name="text">
+    <string>向下翻页</string>
+   </property>
+  </action>
+  <action name="action_13">
+   <property name="text">
+    <string>定位最上</string>
+   </property>
+  </action>
+  <action name="action_14">
+   <property name="text">
+    <string>定位最下</string>
+   </property>
+  </action>
+  <action name="action_15">
+   <property name="text">
+    <string>定位最左</string>
+   </property>
+  </action>
+  <action name="action_16">
+   <property name="text">
+    <string>定位最右</string>
+   </property>
+  </action>
+  <action name="action_0_25">
+   <property name="text">
+    <string>溢价率+0.25%</string>
+   </property>
+  </action>
+  <action name="action_17">
+   <property name="text">
+    <string>溢价率恢复</string>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="switch_behind_action">
+   <property name="text">
+    <string>页面向后切</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Down</string>
+   </property>
+  </action>
+  <action name="move_right_action_2">
+   <property name="text">
+    <string>&lt;&gt;向右平移</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Space</string>
+   </property>
+  </action>
+  <action name="switch_front_action">
+   <property name="text">
+    <string>页面向前切</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Up</string>
+   </property>
+  </action>
+  <action name="show_hide_detail_action">
+   <property name="text">
+    <string>显/隐明细</string>
+   </property>
+  </action>
+  <action name="show_hide_company_action">
+   <property name="text">
+    <string>显/隐对公</string>
+   </property>
+  </action>
+  <action name="hide_detail_company_action">
+   <property name="text">
+    <string>明细对公双隐藏</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Z</string>
+   </property>
+  </action>
+  <action name="page_down_action">
+   <property name="text">
+    <string>向上翻页</string>
+   </property>
+  </action>
+  <action name="page_up_action">
+   <property name="text">
+    <string>向下翻页</string>
+   </property>
+  </action>
+  <action name="location_up_action">
+   <property name="text">
+    <string>定位最上</string>
+   </property>
+  </action>
+  <action name="location_down_action">
+   <property name="text">
+    <string>定位最下</string>
+   </property>
+  </action>
+  <action name="location_left_action">
+   <property name="text">
+    <string>定位最左</string>
+   </property>
+  </action>
+  <action name="location_right_action">
+   <property name="text">
+    <string>定位最右</string>
+   </property>
+  </action>
+  <action name="add_price_action">
+   <property name="text">
+    <string>溢价率+0.25%</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+PgUp</string>
+   </property>
+  </action>
+  <action name="recove_price_action">
+   <property name="text">
+    <string>溢价率恢复</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Home</string>
+   </property>
+  </action>
+  <action name="move_right_action_3">
+   <property name="text">
+    <string>d</string>
    </property>
   </action>
  </widget>

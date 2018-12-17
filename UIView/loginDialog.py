@@ -84,6 +84,11 @@ class Ui_LoginDialog(object):
 
         self.retranslateUi(LoginDialog)
         QtCore.QMetaObject.connectSlotsByName(LoginDialog)
+        LoginDialog.setTabOrder(self.user_name_LineEdit, self.password_LineEdit)
+        LoginDialog.setTabOrder(self.password_LineEdit, self.intranet_server_ip_LineEdit)
+        LoginDialog.setTabOrder(self.intranet_server_ip_LineEdit, self.intranet_server_port_LineEdit)
+        LoginDialog.setTabOrder(self.intranet_server_port_LineEdit, self.local_proxy_server_port_LineEdit)
+        LoginDialog.setTabOrder(self.local_proxy_server_port_LineEdit, self.login_pushButton)
 
     def retranslateUi(self, LoginDialog):
         _translate = QtCore.QCoreApplication.translate
