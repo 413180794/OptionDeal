@@ -1,0 +1,11 @@
+QLabel[name="warn_color"]{
+    background:rgb(0,255,255);
+}
+QLabel[name="tableSheet"]{
+    border:1px solid #242424;
+    background:;
+    padding:2px;
+}
+QLable[name="font_color"]{
+    backgr
+}
